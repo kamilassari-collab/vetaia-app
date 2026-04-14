@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const justRegistered = params.get('registered') === '1';
+  const justReset = params.get('reset') === '1';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -68,6 +69,11 @@ function LoginForm() {
               ✓ Compte créé ! Vérifiez votre email puis connectez-vous.
             </div>
           )}
+          {justReset && (
+            <div style={{ background: '#F0FAF7', border: '1px solid #BBE0D6', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#0B7A6A', fontWeight: 500 }}>
+              ✓ Mot de passe mis à jour ! Connectez-vous avec votre nouveau mot de passe.
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="field">
               <label>Email professionnel</label>
@@ -83,6 +89,9 @@ function LoginForm() {
             </button>
           </form>
 
+          <p className="footer-note">
+            <Link href="/forgot-password" style={{ color: '#0B7A6A', textDecoration: 'none' }}>Mot de passe oublié ?</Link>
+          </p>
           <p className="footer-note">
             Pas encore de compte ? <Link href="/signup" style={{ color: '#0B7A6A', textDecoration: 'none' }}>Créer un compte</Link>
           </p>
