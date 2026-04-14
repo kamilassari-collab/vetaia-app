@@ -13,6 +13,7 @@ import { AiLoader } from '@/components/ui/ai-loader';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { supabase } from '@/lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Source { name: string; url: string; type: string; excerpt: string }
@@ -295,6 +296,7 @@ function ChatInner() {
   const [newFolderName, setNewFolderName] = useState('');
   const newFolderInputRef = useRef<HTMLInputElement>(null);
   const [patientBanner, setPatientBanner] = useState<PatientBanner | null>(null);
+  const [persona, setPersona] = useState(DEMO_PERSONA);
   const [recordingPhase, setRecordingPhase] = useState<'idle' | 'recording' | 'paused' | 'transcribing'>('idle');
   const [recordingTranscript, setRecordingTranscript] = useState('');
   const [inputMode, setInputMode] = useState<'mic' | 'text'>('mic');
@@ -311,20 +313,28 @@ function ChatInner() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (localStorage.getItem('leash-demo-auth') !== 'true') { router.push('/login'); return; }
-    const savedConvos: Conversation[] = JSON.parse(localStorage.getItem('leash-conversations') || '[]');
-    const savedFolders: Folder[] = JSON.parse(localStorage.getItem('leash-folders') || '[]');
-    setFolders(savedFolders);
-    if (savedConvos.length === 0) {
-      const id = genId();
-      const fresh = [{ id, title: 'Nouvelle consultation', folderId: null, messages: [], createdAt: Date.now() }];
-      setConvos(fresh); setCurrentId(id);
-      localStorage.setItem('leash-conversations', JSON.stringify(fresh));
-    } else {
-      setConvos(savedConvos); setCurrentId(savedConvos[0].id);
-    }
-    const prefill = sessionStorage.getItem('leash-prefill');
-    if (prefill) { sessionStorage.removeItem('leash-prefill'); setTimeout(() => { setInput(prefill); setActiveTab('chat'); }, 80); }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { router.push('/login'); return; }
+      const meta = user.user_metadata ?? {};
+      const firstName = meta.first_name ?? '';
+      const lastName = meta.last_name ?? '';
+      const fullName = [firstName, lastName].filter(Boolean).join(' ');
+      const initials = ([(firstName[0] ?? ''), (lastName[0] ?? '')].join('').toUpperCase() || user.email?.[0]?.toUpperCase()) ?? '?';
+      setPersona({ initials, name: fullName ? `Dr. ${fullName}` : (user.email ?? ''), clinic: meta.clinic_name ?? '' });
+      const savedConvos: Conversation[] = JSON.parse(localStorage.getItem('leash-conversations') || '[]');
+      const savedFolders: Folder[] = JSON.parse(localStorage.getItem('leash-folders') || '[]');
+      setFolders(savedFolders);
+      if (savedConvos.length === 0) {
+        const id = genId();
+        const fresh = [{ id, title: 'Nouvelle consultation', folderId: null, messages: [], createdAt: Date.now() }];
+        setConvos(fresh); setCurrentId(id);
+        localStorage.setItem('leash-conversations', JSON.stringify(fresh));
+      } else {
+        setConvos(savedConvos); setCurrentId(savedConvos[0].id);
+      }
+      const prefill = sessionStorage.getItem('leash-prefill');
+      if (prefill) { sessionStorage.removeItem('leash-prefill'); setTimeout(() => { setInput(prefill); setActiveTab('chat'); }, 80); }
+    });
   }, [router]);
 
   useEffect(() => {
@@ -381,7 +391,7 @@ function ChatInner() {
   function renameFolder(id: string, name: string) { if (!name.trim()) return; saveFolders(folders.map(f => f.id === id ? { ...f, name: name.trim() } : f)); setRenamingFolderId(null); }
   function deleteFolder(id: string) { save(convos.map(c => c.folderId === id ? { ...c, folderId: null } : c)); saveFolders(folders.filter(f => f.id !== id)); }
   function moveConvoToFolder(convoId: string, folderId: string | null) { save(convos.map(c => c.id === convoId ? { ...c, folderId } : c)); setMovingConvoId(null); }
-  function logout() { localStorage.removeItem('leash-demo-auth'); router.push('/login'); }
+  async function logout() { await supabase.auth.signOut(); router.push('/login'); }
 
   const autoResize = useCallback(() => {
     const el = textareaRef.current;
@@ -658,11 +668,11 @@ function ChatInner() {
           {/* User row */}
           <div style={{ padding: '10px 12px 14px', borderTop: '1px solid #EDF1F5', display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
             <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, #0B7A6A, #0D9C87)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
-              {DEMO_PERSONA.initials}
+              {persona.initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#364152', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{DEMO_PERSONA.name}</div>
-              <div style={{ fontSize: 11, color: '#94A3B8' }}>{DEMO_PERSONA.clinic}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#364152', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{persona.name}</div>
+              <div style={{ fontSize: 11, color: '#94A3B8' }}>{persona.clinic}</div>
             </div>
             <button onClick={logout} title="Déconnexion"
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, border: 'none', cursor: 'pointer', background: 'transparent', color: '#CBD5E0', transition: 'all 0.15s' }}

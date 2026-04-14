@@ -1,26 +1,32 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Logo } from '@/components/Logo';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import { Suspense } from 'react';
 
-// ─── Demo credentials — internal only, not shown in UI ─────────────────────────
-const DEMO_EMAIL = 'demo@leash-ai.com';
-const DEMO_PASSWORD = 'demo1234';
-
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const justRegistered = params.get('registered') === '1';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      localStorage.setItem('leash-demo-auth', 'true');
-      router.push('/patients');
-    } else {
+    setLoading(true);
+    setError('');
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
       setError('Identifiants incorrects.');
+      setLoading(false);
+      return;
     }
+    localStorage.setItem('leash-demo-auth', 'true');
+    router.push('/chat');
   }
 
   return (
@@ -57,42 +63,35 @@ export default function LoginPage() {
           <h1 className="title">Bienvenue</h1>
           <p className="subtitle">Votre assistant IA vétérinaire</p>
 
+          {justRegistered && (
+            <div style={{ background: '#F0FAF7', border: '1px solid #BBE0D6', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#0B7A6A', fontWeight: 500 }}>
+              ✓ Compte créé ! Vérifiez votre email puis connectez-vous.
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="field">
               <label>Email professionnel</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="vous@clinique.fr"
-                required
-                autoComplete="email"
-              />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@clinique.fr" required autoComplete="email" />
             </div>
             <div className="field">
               <label>Mot de passe</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-              />
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
             </div>
             {error && <div className="error">{error}</div>}
-            <button type="submit" className="btn-primary">Se connecter</button>
+            <button type="submit" className="btn-primary" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+              {loading ? 'Connexion…' : 'Se connecter'}
+            </button>
           </form>
 
           <p className="footer-note">
-            Accès sur invitation · Bêta fermée<br />
-            <a href="https://calendly.com/kamilassari/30min" target="_blank" rel="noreferrer"
-              style={{ color: '#0B7A6A', textDecoration: 'none' }}>
-              Demander un accès →
-            </a>
+            Pas encore de compte ? <Link href="/signup" style={{ color: '#0B7A6A', textDecoration: 'none' }}>Créer un compte</Link>
           </p>
         </div>
       </div>
     </>
   );
+}
+
+export default function LoginPage() {
+  return <Suspense><LoginForm /></Suspense>;
 }
