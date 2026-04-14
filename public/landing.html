@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leash AI — L'IA vétérinaire qui libère votre temps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet" />
+<style>
+/* ── TOKENS ── */
+:root {
+  --size-container: clamp(1080px, 100vw, 1440px);
+  --size-font: calc(var(--size-container) / 90);
+
+  --brand:        #0B7A6A;
+  --brand-lt:     #0D9C87;
+  --brand-dk:     #085D50;
+  --brand-bg:     #EAF4F2;
+  --brand-bg2:    #F0F9F7;
+
+  --ink:          #141414;
+  --ink-2:        #525252;
+  --ink-3:        #A3A3A3;
+  --surface:      #ffffff;
+  --surface-2:    #F5F5F5;
+  --border:       #E8E8E8;
+  --border-2:     #F0F0F0;
+
+  --sh-card: 0 0 0 1px rgba(11,122,106,.04), 0 2px 4px rgba(20,20,20,.04), 0 8px 24px rgba(20,20,20,.06), 0 0 0 2px #fff inset;
+  --sh-card-hover: 0 0 0 1px rgba(11,122,106,.1), 0 4px 12px rgba(20,20,20,.06), 0 20px 48px rgba(20,20,20,.09), 0 0 0 2px #fff inset;
+  --sh-xs: 0 1px 3px rgba(20,20,20,.06), 0 0 0 1px rgba(11,122,106,.08);
+  --sh-btn: 0 1px 0 rgba(255,255,255,.14) inset, 0 0 14px rgba(255,255,255,.16) inset, 0 4px 8px rgba(11,122,106,.12), 0 8px 24px rgba(11,122,106,.14);
+
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.35, 0.64, 1);
+  --dur-s: 0.4s;
+  --dur-m: 0.65s;
+
+  --r-s: 10px; --r: 14px; --r-l: 20px; --r-xl: 26px; --r-2xl: 36px;
+  --max-w: 74em;
+  --pad-h: 2.5em;
+  --sp-xl: 7.5em; --sp-l: 5em; --sp-m: 3em;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: var(--size-font); scroll-behavior: smooth; }
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  color: var(--ink); background: var(--surface);
+  line-height: 1.5; letter-spacing: -0.008em; font-weight: 400;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+::selection { background: var(--brand); color: white; }
+body ::-webkit-scrollbar { display: none; }
+
+/* ── KEYFRAMES ── */
+@keyframes pdot  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.55)} }
+@keyframes sonar { 0%{transform:scale(.6);opacity:1} 100%{transform:scale(2.6);opacity:0} }
+@keyframes wav   { 0%,100%{transform:scaleY(.3)} 50%{transform:scaleY(1)} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes run   { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes in    { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  height: 4.8em;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+.nav-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--pad-h); width: 100%; display: flex; align-items: center; gap: 3em; }
+.nav-logo { display:flex; align-items:center; flex-shrink:0; text-decoration:none; }
+.nav-links { display:flex; align-items:center; gap:.2em; flex:1; }
+.nav-link { font-size:.875em; font-weight:500; color:var(--ink-2); text-decoration:none; padding:.45em .9em; border-radius:var(--r-s); transition:color var(--dur-s) var(--ease), background var(--dur-s) var(--ease); letter-spacing:-.01em; }
+.nav-link:hover { color:var(--ink); background:var(--surface-2); }
+.nav-actions { display:flex; align-items:center; gap:.5em; margin-left:auto; }
+.btn-ghost { font-family:'Geist',sans-serif; font-size:.875em; font-weight:500; color:var(--ink-2); background:none; border:1px solid var(--border); padding:.5em 1em; border-radius:var(--r-s); cursor:pointer; text-decoration:none; transition:color var(--dur-s) var(--ease), background var(--dur-s) var(--ease), border-color var(--dur-s) var(--ease); }
+.btn-ghost:hover { color:var(--ink); background:var(--surface-2); border-color:var(--ink-3); }
+.btn-primary { font-family:'Geist',sans-serif; font-size:.875em; font-weight:600; color:white; background:var(--brand); border:none; padding:.56em 1.3em; border-radius:var(--r); cursor:pointer; text-decoration:none; box-shadow:var(--sh-btn); transition:background var(--dur-s) var(--ease), transform .12s var(--ease-elastic); display:inline-flex; align-items:center; gap:.4em; letter-spacing:-.015em; }
+.btn-primary:hover { background:var(--brand-lt); transform:translateY(-1px); }
+.btn-primary:active { transform:translateY(0); }
+.btn-lg { font-family:'Geist',sans-serif; font-size:1em; font-weight:600; color:white; background:var(--brand); border:none; padding:.8em 1.8em; border-radius:var(--r-l); cursor:pointer; text-decoration:none; box-shadow:var(--sh-btn); transition:background var(--dur-s) var(--ease), transform .12s var(--ease-elastic); display:inline-flex; align-items:center; gap:.5em; letter-spacing:-.02em; }
+.btn-lg:hover { background:var(--brand-lt); transform:translateY(-1px); }
+.btn-lg:active { transform:translateY(0); }
+.btn-text { font-family:'Geist',sans-serif; font-size:1em; font-weight:500; color:var(--ink); background:none; border:1px solid var(--border); padding:.78em 1.6em; border-radius:var(--r-l); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:.5em; letter-spacing:-.02em; transition:color var(--dur-s) var(--ease), border-color var(--dur-s) var(--ease), background var(--dur-s) var(--ease); }
+.btn-text:hover { color:var(--ink); border-color:var(--ink-3); background:var(--surface-2); }
+
+/* ── HERO ── */
+.hero {
+  padding: var(--sp-xl) var(--pad-h);
+  max-width: var(--max-w); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4em; align-items: center;
+  animation: in .8s var(--ease) both;
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:.5em;
+  font-size:.75em; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--brand); background:var(--brand-bg);
+  padding:.32em .9em; border-radius:100em; margin-bottom:1.5em;
+  border:1px solid color-mix(in srgb, var(--brand) 18%, transparent);
+}
+.hero-dot { width:6px; height:6px; border-radius:50%; background:var(--brand); animation:pdot 2s ease-in-out infinite; flex-shrink:0; }
+.hero-h1 {
+  font-family:'Newsreader',serif; font-size:4.5em; font-weight:400;
+  line-height:1.04; letter-spacing:-.035em; color:var(--ink);
+  margin-bottom:.85rem;
+}
+.hero-h1 em { font-style:italic; font-weight:300; color:var(--brand); }
+.hero-sub { font-size:1.1em; line-height:1.72; color:var(--ink-2); margin-bottom:2.5rem; letter-spacing:-.015em; max-width:28em; }
+.hero-actions { display:flex; align-items:center; gap:1em; margin-bottom:2.5em; }
+.hero-trust { display:flex; align-items:center; gap:.7em; flex-wrap:wrap; }
+.trust-item { display:flex; align-items:center; gap:.4em; font-size:.75em; color:var(--ink-3); letter-spacing:-.01em; }
+.trust-sep { color:var(--border); }
+
+/* Hero visual */
+.hero-visual { position:relative; }
+.hero-stack { width:100%; }
+.hero-stack-front {
+  display:flex; flex-direction:column; gap:.7em;
+}
+
+/* ── CARD BASE ── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-l); box-shadow:var(--sh-card);
+}
+
+/* Recording card */
+.rec-card { padding:1.2em; }
+.rec-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:.9em; }
+.rec-live { display:flex; align-items:center; gap:.5em; }
+.rec-dot { width:7px; height:7px; border-radius:50%; background:#16A34A; flex-shrink:0; position:relative; }
+.rec-dot::after { content:''; position:absolute; inset:-3px; border-radius:50%; background:rgba(22,163,74,.15); animation:sonar 2s ease-out infinite; }
+.rec-label { font-size:.75em; font-weight:600; color:#16A34A; }
+.rec-timer { font-family:'Newsreader',serif; font-size:1.05em; color:var(--ink-3); letter-spacing:.04em; }
+.patient-row { background:var(--surface-2); border:1px solid var(--border-2); border-radius:var(--r); padding:.6em .85em; margin-bottom:.85em; display:flex; align-items:center; gap:.65em; }
+.patient-icon { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#DCF0ED,#C4E4E0); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.patient-name { font-size:.8em; font-weight:600; color:var(--ink); letter-spacing:-.02em; }
+.patient-meta { font-size:.68em; color:var(--ink-3); margin-top:1px; }
+.waveform { display:flex; align-items:center; justify-content:center; gap:2.5px; height:32px; margin-bottom:.85em; }
+.bar { width:2.5px; border-radius:2px; background:var(--brand); animation:wav 1.2s ease-in-out infinite; }
+.bar:nth-child(1){height:7px;animation-delay:.00s;opacity:.2} .bar:nth-child(2){height:17px;animation-delay:.10s;opacity:.32} .bar:nth-child(3){height:28px;animation-delay:.20s;opacity:.44} .bar:nth-child(4){height:32px;animation-delay:.30s;opacity:.58} .bar:nth-child(5){height:27px;animation-delay:.40s;opacity:.70} .bar:nth-child(6){height:32px;animation-delay:.50s;opacity:.83} .bar:nth-child(7){height:29px;animation-delay:.60s;opacity:1} .bar:nth-child(8){height:32px;animation-delay:.65s;opacity:.88} .bar:nth-child(9){height:26px;animation-delay:.70s;opacity:.76} .bar:nth-child(10){height:18px;animation-delay:.80s;opacity:.60} .bar:nth-child(11){height:30px;animation-delay:.90s;opacity:.74} .bar:nth-child(12){height:32px;animation-delay:1.0s;opacity:.84} .bar:nth-child(13){height:22px;animation-delay:1.1s;opacity:.56} .bar:nth-child(14){height:30px;animation-delay:.85s;opacity:.70} .bar:nth-child(15){height:16px;animation-delay:.75s;opacity:.38} .bar:nth-child(16){height:26px;animation-delay:.55s;opacity:.58} .bar:nth-child(17){height:10px;animation-delay:.45s;opacity:.28} .bar:nth-child(18){height:18px;animation-delay:.35s;opacity:.40} .bar:nth-child(19){height:8px;animation-delay:.25s;opacity:.22} .bar:nth-child(20){height:5px;animation-delay:.15s;opacity:.17}
+.transcript-box { background:var(--surface-2); border:1px solid var(--border-2); border-radius:var(--r); padding:.65em .85em; margin-bottom:.85em; }
+.transcript-text { font-size:.72em; color:var(--ink-2); line-height:1.7; }
+.transcript-text mark { background:color-mix(in srgb, var(--brand) 10%, transparent); color:var(--brand); border-radius:3px; padding:0 3px; }
+.cursor { display:inline-block; width:1.5px; height:10px; background:var(--brand); vertical-align:text-bottom; margin-left:2px; animation:blink 1s step-end infinite; }
+.rec-actions { display:flex; align-items:center; gap:.5em; }
+.btn-rec-pause { flex:1; padding:.5em; border-radius:var(--r); border:1px solid var(--border); background:white; color:var(--ink-2); font-size:.72em; font-weight:500; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:.4em; transition:background var(--dur-s) var(--ease); }
+.btn-rec-pause:hover { background:var(--surface-2); }
+.btn-rec-gen { flex:2.2; padding:.5em; border-radius:var(--r); border:none; background:var(--brand); color:white; font-size:.72em; font-weight:600; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:.4em; box-shadow:var(--sh-btn); transition:background var(--dur-s) var(--ease); }
+.btn-rec-gen:hover { background:var(--brand-lt); }
+
+/* SOAP card */
+.soap-card { padding:1em 1.2em; }
+.soap-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:.85em; }
+.soap-lbl { font-size:.68em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); }
+.soap-ok { background:#DCFCE7; color:#15803D; font-size:.68em; font-weight:700; padding:.2em .75em; border-radius:100em; }
+.soap-rows { display:flex; flex-direction:column; gap:.55em; }
+.soap-row { display:grid; grid-template-columns:18px 1fr; gap:.6em; align-items:start; }
+.soap-l { width:18px; height:18px; border-radius:5px; background:var(--brand-bg); color:var(--brand); font-size:.65em; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid color-mix(in srgb, var(--brand) 14%, transparent); }
+.soap-t { font-size:.7em; color:var(--ink-2); line-height:1.6; padding-top:2px; }
+
+/* ── MARQUEE ── */
+.marquee-wrap {
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:1em 0; overflow:hidden; background:var(--surface);
+}
+.marquee-inner { display:flex; align-items:center; max-width:var(--max-w); margin:0 auto; padding:0 var(--pad-h); gap:2em; }
+.marquee-lbl { font-size:.72em; color:var(--ink-3); white-space:nowrap; flex-shrink:0; letter-spacing:-.01em; }
+.marquee-sep { width:1px; height:1em; background:var(--border); flex-shrink:0; }
+.marquee-scroll { flex:1; overflow:hidden; }
+.marquee-track { display:flex; gap:.6em; animation:run 28s linear infinite; width:max-content; }
+.marquee-track:hover { animation-play-state:paused; }
+.m-pill { display:inline-flex; align-items:center; gap:.45em; font-size:.75em; font-weight:500; color:var(--ink-2); padding:.38em 1em; border-radius:100em; background:var(--surface-2); border:1px solid var(--border); white-space:nowrap; }
+.m-dot { width:5px; height:5px; border-radius:50%; background:var(--brand); opacity:.5; flex-shrink:0; }
+
+/* ── VALUE PROP SECTION ── */
+.value-section {
+  padding: var(--sp-xl) var(--pad-h);
+  background: var(--brand-bg2);
+  border-top: 1px solid color-mix(in srgb, var(--brand) 9%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 9%, transparent);
+}
+.value-inner { max-width:var(--max-w); margin:0 auto; }
+.value-top {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 5em; align-items: start; margin-bottom: 5em;
+}
+.value-headline {
+  font-family:'Newsreader',serif; font-size:3.5em; font-weight:400;
+  line-height:1.06; letter-spacing:-.035em; color:var(--ink);
+}
+.value-headline em { font-style:italic; font-weight:300; color:var(--brand); }
+.value-right { padding-top: .5em; }
+.value-desc { font-size:1.1em; line-height:1.78; color:var(--ink-2); margin-bottom:2em; letter-spacing:-.015em; }
+.value-cta-note { font-size:.8em; color:var(--ink-3); letter-spacing:-.01em; margin-top:.8em; }
+
+/* Feature duo */
+.feat-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.feat-duo-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: var(--sh-card); display: flex; flex-direction: column;
+  transition: box-shadow var(--dur-m) var(--ease), transform var(--dur-m) var(--ease);
+}
+.feat-duo-card:hover { box-shadow: var(--sh-card-hover); transform: translateY(-2px); }
+.feat-duo-text { padding: 2em 2em 1.6em; }
+.feat-duo-eyebrow { font-size: .68em; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); margin-bottom: .8em; }
+.feat-duo-title { font-family: 'Newsreader', serif; font-size: 1.75em; font-weight: 400; line-height: 1.1; letter-spacing: -.028em; color: var(--ink); margin-bottom: .55em; }
+.feat-duo-title em { font-style: italic; color: var(--brand); font-weight: 300; }
+.feat-duo-desc { font-size: .82em; line-height: 1.75; color: var(--ink-2); }
+.feat-duo-ui { flex: 1; border-top: 1px solid var(--border); background: var(--surface-2); padding: 1.4em; display: flex; flex-direction: column; gap: .55em; min-height: 220px; justify-content: center; }
+
+/* ── HOW IT WORKS ── */
+.how-section { padding: var(--sp-xl) var(--pad-h); background: var(--surface-2); }
+.how-inner { max-width: var(--max-w); margin: 0 auto; }
+.how-head { max-width: 36em; margin-bottom: var(--sp-l); }
+
+/* Step cards grid */
+.step-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25em; }
+.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 2.2em 2em 2em; text-align: center; transition: box-shadow var(--dur-m) var(--ease), transform var(--dur-m) var(--ease); }
+.step-card:hover { box-shadow: var(--sh-card-hover); transform: translateY(-2px); }
+
+/* Icon decorator (grid bg + emoji) */
+.step-deco { position: relative; width: 88px; height: 88px; margin: 0 auto 1.5em; }
+.step-deco-grid { position: absolute; inset: 0; border-radius: 50%; background-image: linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px); background-size: 14px 14px; mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 65%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 65%, transparent 100%); opacity: .7; }
+.step-deco-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.9em; }
+.step-badge { display: inline-flex; align-items: center; gap: .35em; font-size: .65em; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--brand); background: var(--brand-bg); padding: .3em .8em; border-radius: 100em; border: 1px solid color-mix(in srgb, var(--brand) 14%, transparent); margin-bottom: .9em; }
+.step-card-title { font-size: 1.05em; font-weight: 600; color: var(--ink); letter-spacing: -.022em; line-height: 1.25; margin-bottom: .55em; }
+.step-card-desc { font-size: .825em; color: var(--ink-2); line-height: 1.78; letter-spacing: -.01em; }
+
+
+/* ── MOCKUP PANEL ── */
+.dual-stack { width:100%; }
+.dual-front { width:100%; }
+.dual-front.right-side { margin-left:auto; }
+.dual-front.left-side  { margin-right:auto; }
+
+/* Mockup card shared styles */
+.mockup-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-l); box-shadow:var(--sh-card);
+  overflow:hidden;
+}
+.mockup-head { background:var(--surface); border-bottom:1px solid var(--border-2); padding:.75em 1em; display:flex; align-items:center; gap:.6em; }
+.mockup-body { background:var(--surface-2); padding:.9em; display:flex; flex-direction:column; gap:.65em; }
+.bubble-ai { background:var(--surface); border:1px solid var(--border); border-radius:14px 14px 14px 4px; padding:.65em .85em; font-size:.72em; color:var(--ink-2); line-height:1.72; max-width:90%; box-shadow:var(--sh-xs); }
+.bubble-ai strong { color:var(--ink); font-weight:600; }
+.bubble-user { background:var(--brand); border-radius:14px 14px 4px 14px; padding:.65em .85em; font-size:.72em; color:white; line-height:1.65; max-width:82%; align-self:flex-end; }
+.bubble-ok { background:linear-gradient(135deg,#DCFCE7,#D1FAE5); border:1px solid #A7F3D0; border-radius:14px 14px 14px 4px; padding:.65em .85em; font-size:.72em; color:#065F46; line-height:1.65; max-width:90%; }
+.src-badge { font-size:.62em; color:var(--brand); background:var(--brand-bg); padding:.18em .65em; border-radius:100em; font-weight:700; letter-spacing:.02em; border:1px solid color-mix(in srgb, var(--brand) 14%, transparent); }
+.spk { font-size:.62em; font-weight:700; padding:.2em .65em; border-radius:100em; white-space:nowrap; margin-top:3px; flex-shrink:0; letter-spacing:.02em; }
+.spk-vet { background:var(--brand-bg); color:var(--brand); border:1px solid color-mix(in srgb, var(--brand) 14%, transparent); }
+.spk-own { background:#FFFBEB; color:#92400E; border:1px solid rgba(146,64,14,.12); }
+.speech-bub { background:var(--surface); border:1px solid var(--border-2); border-radius:var(--r); padding:.6em .8em; font-size:.72em; color:var(--ink-2); line-height:1.7; box-shadow:var(--sh-xs); }
+.int-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:.6em; }
+.int-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:.8em .9em; display:flex; align-items:center; gap:.65em; transition:border-color var(--dur-s) var(--ease); }
+.int-card:hover { border-color:color-mix(in srgb, var(--brand) 28%, transparent); }
+.int-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.int-name { font-size:.72em; font-weight:600; color:var(--ink); }
+.int-status { font-size:.62em; color:var(--ink-3); margin-top:1px; }
+.int-dot { width:6px; height:6px; border-radius:50%; background:var(--border); flex-shrink:0; margin-left:auto; }
+
+/* ── TESTIMONIALS ── */
+.dark-section { background:var(--surface-2); padding:var(--sp-xl) var(--pad-h); border-top:1px solid var(--border); }
+.dark-inner { max-width:var(--max-w); margin:0 auto; }
+.dark-head { text-align:center; max-width:34em; margin:0 auto 3.5em; }
+.dark-overline { display:inline-flex; align-items:center; gap:.45em; font-size:.72em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--brand); margin-bottom:1.1em; padding:.3em 1em; border-radius:100em; background:var(--brand-bg); border:1px solid color-mix(in srgb, var(--brand) 16%, transparent); }
+.dark-h2 { font-family:'Newsreader',serif; font-size:3.25em; font-weight:400; letter-spacing:-.035em; line-height:1.06; color:var(--ink); margin-bottom:.8em; }
+.dark-h2 em { font-style:italic; font-weight:300; color:var(--brand); }
+.dark-sub { font-size:1em; color:var(--ink-2); line-height:1.72; letter-spacing:-.015em; }
+.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1em; }
+.testi-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-l); padding:1.6em; transition:box-shadow var(--dur-m) var(--ease), transform var(--dur-m) var(--ease); }
+.testi-card:hover { box-shadow:var(--sh-card-hover); transform:translateY(-2px); }
+.testi-stars { font-size:.75em; margin-bottom:.9em; letter-spacing:2px; color:#F59E0B; }
+.testi-quote { font-size:.875em; color:var(--ink-2); line-height:1.8; margin-bottom:1.4em; letter-spacing:-.01em; }
+.testi-quote strong { color:var(--ink); font-weight:500; }
+.testi-author { display:flex; align-items:center; gap:.65em; }
+.testi-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-family:'Geist',sans-serif; font-weight:700; letter-spacing:-.01em; color:rgba(255,255,255,.9); flex-shrink:0; }
+.testi-name { font-size:.8em; font-weight:600; color:var(--ink); letter-spacing:-.02em; }
+.testi-role { font-size:.7em; color:var(--ink-3); margin-top:1px; }
+
+/* ── FAQ ── */
+.faq-wrap { padding:var(--sp-xl) var(--pad-h); }
+.faq-inner { max-width:48em; margin:0 auto; }
+.section-head { text-align:center; margin-bottom:var(--sp-m); }
+.overline { display:inline-block; background:var(--brand-bg); color:var(--brand); font-size:.72em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:.3em .9em; border-radius:100em; margin-bottom:.9em; border:1px solid color-mix(in srgb, var(--brand) 15%, transparent); }
+.sh2 { font-family:'Newsreader',serif; font-size:2.5em; font-weight:400; letter-spacing:-.03em; line-height:1.08; color:var(--ink); margin-bottom:.7em; }
+.sh2 em { font-style:italic; font-weight:300; color:var(--brand); }
+.ssub { font-size:1em; color:var(--ink-2); line-height:1.72; letter-spacing:-.01em; }
+.faq-item { border-bottom:1px solid var(--border); padding:1.3em 0; cursor:pointer; }
+.faq-item:first-of-type { border-top:1px solid var(--border); }
+.faq-q { display:flex; align-items:center; justify-content:space-between; gap:1em; }
+.faq-question { font-size:.95em; font-weight:500; color:var(--ink); letter-spacing:-.015em; }
+.faq-icon { width:24px; height:24px; border-radius:50%; border:1px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--ink-3); font-size:16px; line-height:1; transition:background var(--dur-s) var(--ease), border-color var(--dur-s) var(--ease), color var(--dur-s) var(--ease), transform .3s var(--ease-elastic); }
+.faq-item.open .faq-icon { background:var(--brand); border-color:var(--brand); color:white; transform:rotate(45deg); }
+.faq-answer { max-height:0; overflow:hidden; transition:max-height .4s var(--ease), padding .4s var(--ease); }
+.faq-item.open .faq-answer { max-height:240px; padding-top:.9em; }
+.faq-answer p { font-size:.875em; color:var(--ink-2); line-height:1.82; letter-spacing:-.01em; }
+
+/* ── CTA ── */
+.cta-section { padding:0 var(--pad-h) var(--sp-xl); max-width:var(--max-w); margin:0 auto; }
+.cta-box { border-radius:var(--r-2xl); background:linear-gradient(152deg, var(--brand-dk) 0%, var(--brand) 52%, var(--brand-lt) 100%); padding:var(--sp-xl) var(--pad-h); text-align:center; overflow:hidden; position:relative; }
+.cta-box::before { content:''; position:absolute; top:-200px; left:50%; transform:translateX(-50%); width:900px; height:700px; background:radial-gradient(ellipse, rgba(255,255,255,.12) 0%, transparent 60%); pointer-events:none; }
+.cta-overline { display:inline-block; background:rgba(255,255,255,.12); color:rgba(255,255,255,.86); font-size:.72em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:.3em 1em; border-radius:100em; margin-bottom:1.3em; position:relative; border:1px solid rgba(255,255,255,.15); }
+.cta-h2 { font-family:'Newsreader',serif; font-size:3.5em; font-weight:400; letter-spacing:-.035em; line-height:1.06; color:white; margin-bottom:.9em; position:relative; }
+.cta-h2 em { font-style:italic; font-weight:300; color:rgba(255,255,255,.6); }
+.cta-sub { font-size:1em; color:rgba(255,255,255,.54); line-height:1.72; max-width:28em; margin:0 auto 2.2em; position:relative; letter-spacing:-.01em; }
+.cta-actions { display:flex; align-items:center; justify-content:center; gap:.75em; flex-wrap:wrap; position:relative; }
+.btn-white { font-family:'Geist',sans-serif; font-size:1em; font-weight:600; letter-spacing:-.02em; color:var(--brand); background:white; border:none; padding:.8em 1.8em; border-radius:var(--r-l); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:.5em; box-shadow:0 2px 12px rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.08); transition:transform .12s var(--ease-elastic), box-shadow var(--dur-s) var(--ease); }
+.btn-white:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,.14),0 16px 48px rgba(0,0,0,.12); }
+.btn-outline-w { font-family:'Geist',sans-serif; font-size:1em; font-weight:500; letter-spacing:-.02em; color:rgba(255,255,255,.8); background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); padding:.78em 1.6em; border-radius:var(--r-l); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:.5em; transition:background var(--dur-s) var(--ease), color var(--dur-s) var(--ease); }
+.btn-outline-w:hover { background:rgba(255,255,255,.18); color:white; }
+
+/* ── FOOTER ── */
+footer { background:var(--ink); border-top:1px solid rgba(255,255,255,.05); }
+.footer-inner { max-width:var(--max-w); margin:0 auto; padding:var(--sp-l) var(--pad-h) var(--sp-m); display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr; gap:3em; }
+.footer-desc { font-size:.75em; color:rgba(255,255,255,.24); line-height:1.78; margin-top:.9em; max-width:16em; }
+.fcol-title { font-size:.68em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:rgba(255,255,255,.2); margin-bottom:.9em; }
+.flinks { display:flex; flex-direction:column; gap:.6em; }
+.flink { font-size:.825em; color:rgba(255,255,255,.32); text-decoration:none; letter-spacing:-.01em; transition:color var(--dur-s) var(--ease); }
+.flink:hover { color:rgba(255,255,255,.7); }
+.footer-bottom { max-width:var(--max-w); margin:0 auto; padding:1.2em var(--pad-h); border-top:1px solid rgba(255,255,255,.05); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75em; }
+.footer-bottom p { font-size:.72em; color:rgba(255,255,255,.18); }
+.f-badge { display:inline-flex; align-items:center; gap:.35em; padding:.28em .75em; border-radius:100em; font-size:.68em; font-weight:600; }
+.f-badge-teal { background:rgba(11,122,106,.14); border:1px solid rgba(11,122,106,.2); color:#2DD4C0; }
+.f-badge-dim  { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.24); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo" aria-label="Leash AI">
+      <svg width="90" height="27" viewBox="0 0 320 100" fill="none">
+        <path d="M0 32L32 0v64L0 64z" fill="#0B7A6A"/>
+        <path d="M32 0h32v32L32 64V32z" fill="#141414"/>
+        <text x="80" y="70" font-family="Geist,system-ui,sans-serif" font-size="54" font-weight="600" fill="#141414" letter-spacing="-2">Leash</text>
+        <text x="248" y="70" font-family="Geist,system-ui,sans-serif" font-size="54" font-weight="600" fill="#0B7A6A" letter-spacing="-2">AI</text>
+      </svg>
+    </a>
+    <div class="nav-links">
+      <a href="#fonctionnalites" class="nav-link">Fonctionnalités</a>
+      <a href="#comment-ca-marche" class="nav-link">Comment ça marche</a>
+      <a href="#temoignages" class="nav-link">Témoignages</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="btn-ghost">Connexion</a>
+      <a href="#" class="btn-primary">
+        Accès gratuit
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5h7M6 2.5l3.5 3L6 8.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section style="overflow:hidden;position:relative;">
+  <div style="position:absolute;top:-200px;right:-100px;width:700px;height:700px;background:radial-gradient(circle,color-mix(in srgb,#0B7A6A 6%,transparent) 0%,transparent 65%);pointer-events:none;"></div>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge"><span class="hero-dot"></span>Bêta ouverte · Accès gratuit</div>
+      <h1 class="hero-h1">Vos rapports SOAP,<br><em>rédigés en dictant.</em></h1>
+      <p class="hero-sub">Dictez pendant la consultation. Leash AI génère le compte-rendu SOAP structuré en 30 secondes. Un assistant clinique répond à vos questions de dosage en temps réel.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn-lg">
+          Commencer gratuitement
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7.5 3l4 3.5-4 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="https://calendly.com/kamilassari/30min" class="btn-text" target="_blank">
+          Voir une démo →
+        </a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#0B7A6A" stroke-width="1.1"/><path d="M3.5 6l1.8 1.8 3.2-3.2" stroke="#0B7A6A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Données en Europe · RGPD
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#0B7A6A" stroke-width="1.1"/><path d="M3.5 6l1.8 1.8 3.2-3.2" stroke="#0B7A6A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Réservé aux vétérinaires diplômés
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-stack">
+        <div class="hero-stack-front">
+          <!-- Recording card -->
+          <div class="card rec-card">
+            <div class="rec-header">
+              <div class="rec-live">
+                <div class="rec-dot"></div>
+                <span class="rec-label">Consultation en cours</span>
+              </div>
+              <span class="rec-timer">02:47</span>
+            </div>
+            <div class="patient-row">
+              <div class="patient-icon">
+                <svg width="15" height="15" viewBox="0 0 18 18" fill="none"><ellipse cx="9" cy="12" rx="5" ry="3.5" stroke="#0B7A6A" stroke-width="1.4"/><circle cx="9" cy="6" r="2.2" stroke="#0B7A6A" stroke-width="1.4"/><circle cx="5.2" cy="4.2" r="1" fill="#0B7A6A" opacity=".4"/><circle cx="12.8" cy="4.2" r="1" fill="#0B7A6A" opacity=".4"/></svg>
+              </div>
+              <div>
+                <div class="patient-name">Rex · Golden Retriever</div>
+                <div class="patient-meta">4 ans · Mâle · 32 kg</div>
+              </div>
+            </div>
+            <div class="waveform">
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <div class="transcript-box">
+              <p class="transcript-text">Propriétaire rapporte une <mark>boiterie postérieure droite</mark> depuis 3 jours, sans traumatisme identifié. Légère diminution d'activité<span class="cursor"></span></p>
+            </div>
+            <div class="rec-actions">
+              <button class="btn-rec-pause">
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><rect x="1" y=".5" width="2.5" height="8" rx="1" fill="currentColor"/><rect x="5.5" y=".5" width="2.5" height="8" rx="1" fill="currentColor"/></svg>
+                Pause
+              </button>
+              <button class="btn-rec-gen">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1l.8 2.8H8.5L6.1 5.6l.9 2.8L5 7l-2 1.4.9-2.8L1.5 3.8H4.2z" stroke="white" stroke-width="1" stroke-linejoin="round"/></svg>
+                Générer le compte-rendu
+              </button>
+            </div>
+          </div>
+          <!-- SOAP card -->
+          <div class="card soap-card">
+            <div class="soap-top">
+              <span class="soap-lbl">Compte-rendu SOAP</span>
+              <span class="soap-ok">✓ Généré en 8 sec</span>
+            </div>
+            <div class="soap-rows">
+              <div class="soap-row"><div class="soap-l">S</div><div class="soap-t">Boiterie postérieure droite depuis 3 jours, sans traumatisme.</div></div>
+              <div class="soap-row"><div class="soap-l">O</div><div class="soap-t">32 kg · T° 38,6°C · Douleur à la palpation du LCC.</div></div>
+              <div class="soap-row"><div class="soap-l">A</div><div class="soap-t">Suspicion rupture partielle ligament croisé crânial.</div></div>
+              <div class="soap-row"><div class="soap-l">P</div><div class="soap-t">Méloxicam 0,1 mg/kg/j × 5j · Radio · Repos strict.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MARQUEE ── -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span class="marquee-lbl">Utilisé par des cliniques en France</span>
+    <div class="marquee-sep"></div>
+    <div class="marquee-scroll">
+      <div class="marquee-track">
+        <div class="m-pill"><span class="m-dot"></span>Vétoclinic Lyon</div>
+        <div class="m-pill"><span class="m-dot"></span>Cabinet VetPro Paris</div>
+        <div class="m-pill"><span class="m-dot"></span>Clinique Animalia</div>
+        <div class="m-pill"><span class="m-dot"></span>VetCenter Bordeaux</div>
+        <div class="m-pill"><span class="m-dot"></span>ClinVet Toulouse</div>
+        <div class="m-pill"><span class="m-dot"></span>Vétofrance Nantes</div>
+        <div class="m-pill"><span class="m-dot"></span>Clinique du Parc Lille</div>
+        <div class="m-pill"><span class="m-dot"></span>Centre Vétérinaire Marseille</div>
+        <div class="m-pill"><span class="m-dot"></span>Vétoclinic Lyon</div>
+        <div class="m-pill"><span class="m-dot"></span>Cabinet VetPro Paris</div>
+        <div class="m-pill"><span class="m-dot"></span>Clinique Animalia</div>
+        <div class="m-pill"><span class="m-dot"></span>VetCenter Bordeaux</div>
+        <div class="m-pill"><span class="m-dot"></span>ClinVet Toulouse</div>
+        <div class="m-pill"><span class="m-dot"></span>Vétofrance Nantes</div>
+        <div class="m-pill"><span class="m-dot"></span>Clinique du Parc Lille</div>
+        <div class="m-pill"><span class="m-dot"></span>Centre Vétérinaire Marseille</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VALUE PROP + BENTO ── -->
+<section class="value-section" id="fonctionnalites">
+  <div class="value-inner">
+    <div class="value-top">
+      <h2 class="value-headline">
+        Deux outils.<br>Un seul objectif :<br><em>vous libérer du temps.</em>
+      </h2>
+      <div class="value-right">
+        <p class="value-desc">Chaque heure passée sur les dossiers est une heure prise sur vos patients. Leash AI prend en charge la rédaction des comptes-rendus et répond à vos questions cliniques en temps réel.</p>
+        <a href="#" class="btn-lg">
+          Commencer gratuitement
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5h8M7.5 3l4 3.5-4 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <p class="value-cta-note">Données hébergées en Europe · RGPD</p>
+      </div>
+    </div>
+
+    <!-- Features duo -->
+    <div class="feat-duo">
+
+      <!-- Card 1 — Dictée & Transcription SOAP -->
+      <div class="feat-duo-card">
+        <div class="feat-duo-text">
+          <div class="feat-duo-eyebrow">Dictée & Transcription</div>
+          <div class="feat-duo-title">Fini la rédaction.<br><em>Pour toujours.</em></div>
+          <p class="feat-duo-desc">Vous parlez, Leash AI rédige. Le compte-rendu SOAP est prêt en 30 secondes, sans que vous ayez touché au clavier.</p>
+        </div>
+        <div class="feat-duo-ui">
+          <!-- Mini dictation → SOAP mockup -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;box-shadow:var(--sh-card);">
+            <div style="padding:.75em 1em;border-bottom:1px solid var(--border-2);display:flex;align-items:center;gap:.6em;">
+              <div style="width:7px;height:7px;border-radius:50%;background:#16A34A;box-shadow:0 0 0 3px rgba(22,163,74,.15);flex-shrink:0;"></div>
+              <span style="font-size:.72em;font-weight:600;color:var(--ink);">Consultation en cours</span>
+              <span style="margin-left:auto;font-family:'Newsreader',serif;font-size:.8em;color:var(--ink-3);">04:12</span>
+            </div>
+            <div style="padding:.85em 1em;background:var(--surface-2);display:flex;align-items:center;gap:.6em;">
+              <div style="display:flex;align-items:center;gap:2.5px;flex:1;">
+                <div class="bar" style="height:8px;width:2.5px;"></div><div class="bar" style="height:18px;width:2.5px;animation-delay:.1s;"></div><div class="bar" style="height:28px;width:2.5px;animation-delay:.2s;"></div><div class="bar" style="height:22px;width:2.5px;animation-delay:.3s;"></div><div class="bar" style="height:30px;width:2.5px;animation-delay:.4s;"></div><div class="bar" style="height:26px;width:2.5px;animation-delay:.5s;"></div><div class="bar" style="height:30px;width:2.5px;animation-delay:.6s;"></div><div class="bar" style="height:20px;width:2.5px;animation-delay:.7s;"></div><div class="bar" style="height:14px;width:2.5px;animation-delay:.55s;"></div><div class="bar" style="height:8px;width:2.5px;animation-delay:.35s;"></div>
+              </div>
+              <span style="font-size:.65em;color:var(--ink-3);white-space:nowrap;">Enregistrement actif</span>
+            </div>
+            <div style="padding:.85em 1em;">
+              <div style="font-size:.65em;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.65em;">Compte-rendu SOAP</div>
+              <div style="display:flex;flex-direction:column;gap:.45em;">
+                <div style="display:flex;gap:.5em;align-items:flex-start;">
+                  <div style="width:16px;height:16px;border-radius:4px;background:var(--brand-bg);color:var(--brand);font-size:.6em;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid color-mix(in srgb,var(--brand) 14%,transparent);">S</div>
+                  <span style="font-size:.7em;color:var(--ink-2);line-height:1.5;">Boiterie postérieure droite depuis 3 jours.</span>
+                </div>
+                <div style="display:flex;gap:.5em;align-items:flex-start;">
+                  <div style="width:16px;height:16px;border-radius:4px;background:var(--brand-bg);color:var(--brand);font-size:.6em;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid color-mix(in srgb,var(--brand) 14%,transparent);">O</div>
+                  <span style="font-size:.7em;color:var(--ink-2);line-height:1.5;">32 kg · T° 38,6°C · LCC douloureux.</span>
+                </div>
+                <div style="display:flex;gap:.5em;align-items:flex-start;">
+                  <div style="width:16px;height:16px;border-radius:4px;background:var(--brand-bg);color:var(--brand);font-size:.6em;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid color-mix(in srgb,var(--brand) 14%,transparent);">A</div>
+                  <span style="font-size:.7em;color:var(--ink-2);line-height:1.5;">Suspicion rupture partielle ligament croisé.</span>
+                </div>
+                <div style="display:flex;gap:.5em;align-items:flex-start;">
+                  <div style="width:16px;height:16px;border-radius:4px;background:var(--brand-bg);color:var(--brand);font-size:.6em;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid color-mix(in srgb,var(--brand) 14%,transparent);">P</div>
+                  <span style="font-size:.7em;color:var(--ink-2);line-height:1.5;">Méloxicam 0,1 mg/kg/j × 5j · Radio · Repos.</span>
+                </div>
+              </div>
+              <div style="margin-top:.85em;">
+                <span style="background:#DCFCE7;color:#15803D;font-size:.65em;font-weight:700;padding:.2em .75em;border-radius:100em;">✓ Généré en 28 sec</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 — Assistant clinique IA -->
+      <div class="feat-duo-card">
+        <div class="feat-duo-text">
+          <div class="feat-duo-eyebrow">Assistant clinique IA</div>
+          <div class="feat-duo-title">La bonne réponse,<br>en <em>5 secondes.</em></div>
+          <p class="feat-duo-desc">Dosages, interactions médicamenteuses, protocoles. Posez votre question en langage naturel et obtenez une réponse sourcée immédiatement.</p>
+        </div>
+        <div class="feat-duo-ui">
+          <!-- Chat mockup -->
+          <div style="display:flex;flex-direction:column;gap:.55em;">
+            <div style="display:flex;justify-content:flex-end;">
+              <div style="background:var(--brand);border-radius:14px 14px 4px 14px;padding:.6em .9em;font-size:.72em;color:white;line-height:1.6;max-width:82%;">Méloxicam pour un Golden de 32 kg ?</div>
+            </div>
+            <div style="display:flex;gap:.5em;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:6px;background:var(--brand-bg);border:1px solid color-mix(in srgb,var(--brand) 18%,transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1.5C3.3 1.5 1.5 3.3 1.5 5.5S3.3 9.5 5.5 9.5 9.5 7.7 9.5 5.5 7.7 1.5 5.5 1.5z" stroke="#0B7A6A" stroke-width="1.1"/><path d="M5.5 3.5v2.2l1.5.9" stroke="#0B7A6A" stroke-width="1.1" stroke-linecap="round"/></svg>
+              </div>
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:4px 14px 14px 14px;padding:.65em .9em;font-size:.72em;color:var(--ink-2);line-height:1.75;flex:1;">
+                <strong style="color:var(--ink);">J1 : 6,4 mg</strong> (0,2 mg/kg, charge)<br>
+                Entretien : <strong style="color:var(--ink);">3,2 mg/j</strong> × 5 jours<br>
+                <span style="color:var(--brand);font-size:.9em;font-weight:600;">Source : Merck Vet Manual</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;">
+              <div style="background:var(--brand);border-radius:14px 14px 4px 14px;padding:.6em .9em;font-size:.72em;color:white;line-height:1.6;max-width:82%;">Contre-indications à vérifier ?</div>
+            </div>
+            <div style="display:flex;gap:.5em;align-items:flex-start;">
+              <div style="width:22px;height:22px;border-radius:6px;background:var(--brand-bg);border:1px solid color-mix(in srgb,var(--brand) 18%,transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1.5C3.3 1.5 1.5 3.3 1.5 5.5S3.3 9.5 5.5 9.5 9.5 7.7 9.5 5.5 7.7 1.5 5.5 1.5z" stroke="#0B7A6A" stroke-width="1.1"/><path d="M5.5 3.5v2.2l1.5.9" stroke="#0B7A6A" stroke-width="1.1" stroke-linecap="round"/></svg>
+              </div>
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:4px 14px 14px 14px;padding:.65em .9em;font-size:.72em;color:var(--ink-2);line-height:1.75;flex:1;">
+                Insuffisance rénale, hépatique, ulcère GI. Éviter avec corticoïdes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-section" id="comment-ca-marche">
+  <div class="how-inner">
+    <div class="how-head">
+      <div class="overline">En pratique</div>
+      <h2 class="sh2">De l'enregistrement<br>au rapport, <em>en 30 secondes.</em></h2>
+      <p class="ssub">Voici exactement ce qui se passe quand vous utilisez Leash AI en consultation.</p>
+    </div>
+    <div class="step-cards">
+      <!-- Card 1 -->
+      <div class="step-card">
+        <div class="step-deco">
+          <div class="step-deco-grid"></div>
+          <div class="step-deco-icon">🎙️</div>
+        </div>
+        <div class="step-badge">Étape 01</div>
+        <div class="step-card-title">Enregistrez pendant la consultation</div>
+        <p class="step-card-desc">Lancez l'enregistrement avant de faire entrer le patient. Parlez normalement. Leash AI transcrit en temps réel, termes latins et doses compris.</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="step-card">
+        <div class="step-deco">
+          <div class="step-deco-grid"></div>
+          <div class="step-deco-icon">⚡</div>
+        </div>
+        <div class="step-badge">Étape 02</div>
+        <div class="step-card-title">Générez le SOAP en un clic</div>
+        <p class="step-card-desc">À la fin de la consultation, cliquez sur "Générer". Le compte-rendu SOAP structuré est prêt en 30 secondes, avant que le propriétaire reparte.</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="step-card">
+        <div class="step-deco">
+          <div class="step-deco-grid"></div>
+          <div class="step-deco-icon">📋</div>
+        </div>
+        <div class="step-badge">Étape 03</div>
+        <div class="step-card-title">Relisez, ajustez et copiez</div>
+        <p class="step-card-desc">Le rapport est entièrement éditable. Modifiez ce qui ne convient pas, puis copiez-le en un clic dans votre logiciel de gestion. Rien à ressaisir.</p>
+      </div>
+
+    </div><!-- end step-cards -->
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="dark-section" id="temoignages">
+  <div class="dark-inner">
+    <div class="dark-head">
+      <div class="dark-overline">
+        <svg width="7" height="7" viewBox="0 0 7 7" fill="none"><circle cx="3.5" cy="3.5" r="3" fill="#2DD4C0"/></svg>
+        Témoignages
+      </div>
+      <h2 class="dark-h2">Ils ont arrêté de rédiger <em>leurs rapports eux-mêmes.</em></h2>
+      <p class="dark-sub">Ils font partie des premières cliniques à tester Leash AI pendant la bêta.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Je dicte pendant la consultation et le SOAP est prêt avant que le propriétaire ait remis sa laisse. <strong>J'ai récupéré presque deux heures par jour.</strong>"</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#0B4A40,#0B7A6A);">MD</div>
+          <div><div class="testi-name">Dr. Marie Dubois</div><div class="testi-role">Vétérinaire généraliste · Lyon</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"En chirurgie on perd beaucoup de temps à dicter les comptes-rendus post-op. Avec Leash AI, <strong>je parle et le rapport est structuré en trente secondes.</strong> Bluffant."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#1A1A2E,#16213E);">AM</div>
+          <div><div class="testi-name">Dr. Antoine Mercier</div><div class="testi-role">Chirurgien vétérinaire · Paris</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Les dosages, les interactions médicamenteuses. Je pose la question, <strong>j'ai la réponse sourcée en quelques secondes.</strong> C'est le genre d'outil qu'on ne réalise pas dont on avait besoin."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#2D1B4E,#1A0F30);">SL</div>
+          <div><div class="testi-name">Dr. Sophie Laurent</div><div class="testi-role">Vétérinaire généraliste · Bordeaux</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<div class="faq-wrap">
+  <div class="faq-inner">
+    <div class="section-head">
+      <div class="overline">Questions fréquentes</div>
+      <h2 class="sh2">Tout ce que vous <em>voulez savoir</em></h2>
+    </div>
+    <div class="faq-item open" onclick="toggleFaq(this)">
+      <div class="faq-q"><span class="faq-question">Mes données sont-elles sécurisées ?</span><div class="faq-icon">+</div></div>
+      <div class="faq-answer"><p>Toutes les données sont hébergées en Europe (France/Allemagne), chiffrées en transit et au repos. Conforme RGPD. Vos consultations ne servent jamais à entraîner des modèles tiers.</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q"><span class="faq-question">Faut-il un équipement spécial pour la dictée ?</span><div class="faq-icon">+</div></div>
+      <div class="faq-answer"><p>Non. Le microphone de votre ordinateur, tablette ou smartphone suffit. Une connexion internet et c'est tout.</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q"><span class="faq-question">L'IA remplace-t-elle mon jugement clinique ?</span><div class="faq-icon">+</div></div>
+      <div class="faq-answer"><p>Non. Leash AI est un outil d'aide à la décision réservé aux vétérinaires diplômés. Il vous fait gagner du temps sur l'administratif. Le diagnostic reste votre expertise.</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q"><span class="faq-question">Quand les intégrations logicielles seront-elles disponibles ?</span><div class="faq-icon">+</div></div>
+      <div class="faq-answer"><p>Les intégrations avec Vetup, VetManager, Provet Cloud et eVetPractice arrivent prochainement. Inscrivez-vous pour être notifié dès le lancement.</p></div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q"><span class="faq-question">Y a-t-il une période d'essai gratuite ?</span><div class="faq-icon">+</div></div>
+      <div class="faq-answer"><p>Oui. Pendant la bêta, Leash AI est entièrement gratuit, sans limite de consultations. Accès immédiat après inscription.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA ── -->
+<div class="cta-section">
+  <div class="cta-box">
+    <div class="cta-overline">Accès anticipé gratuit</div>
+    <h2 class="cta-h2">Concentrez-vous sur <em>l'animal.</em></h2>
+    <p class="cta-sub">Rejoignez les premières cliniques à tester Leash AI. Accès complet pendant la bêta, sans engagement.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-white">
+        Commencer maintenant
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 2.5l4 3.5-4 3.5" stroke="#0B7A6A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="https://calendly.com/kamilassari/30min" class="btn-outline-w" target="_blank">Réserver une démo →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <svg width="84" height="25" viewBox="0 0 320 100" fill="none" aria-label="Leash AI">
+        <path d="M0 32L32 0v64L0 64z" fill="#0D9C87"/>
+        <path d="M32 0h32v32L32 64V32z" fill="white"/>
+        <text x="80" y="70" font-family="Geist,system-ui,sans-serif" font-size="54" font-weight="600" fill="white" letter-spacing="-2">Leash</text>
+        <text x="248" y="70" font-family="Geist,system-ui,sans-serif" font-size="54" font-weight="600" fill="#2DD4C0" letter-spacing="-2">AI</text>
+      </svg>
+      <p class="footer-desc">Assistant clinique IA conçu exclusivement pour les vétérinaires diplômés. Données hébergées en Europe.</p>
+      <div style="display:flex;gap:.5em;margin-top:1em;flex-wrap:wrap;">
+        <span class="f-badge f-badge-teal">🇪🇺 RGPD conforme</span>
+        <span class="f-badge f-badge-dim">🔒 Données UE</span>
+      </div>
+    </div>
+    <div>
+      <div class="fcol-title">Produit</div>
+      <div class="flinks">
+        <a href="#fonctionnalites" class="flink">Transcription SOAP</a>
+        <a href="#fonctionnalites" class="flink">Assistant clinique</a>
+        <a href="#comment-ca-marche" class="flink">Comment ça marche</a>
+        <a href="https://calendly.com/kamilassari/30min" class="flink" target="_blank">Réserver une démo</a>
+      </div>
+    </div>
+    <div>
+      <div class="fcol-title">Conformité</div>
+      <div class="flinks">
+        <a href="#" class="flink">Mentions légales</a>
+        <a href="#" class="flink">Confidentialité</a>
+        <a href="#" class="flink">CGU</a>
+        <a href="#" class="flink">Cookies</a>
+      </div>
+    </div>
+    <div>
+      <div class="fcol-title">Avertissement</div>
+      <p style="font-size:.72em;color:rgba(255,255,255,.2);line-height:1.78;">Outil d'aide à la décision destiné <strong style="color:rgba(255,255,255,.34);">exclusivement aux vétérinaires diplômés</strong>. Ne remplace pas le jugement clinique professionnel.</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Leash AI · Tous droits réservés</p>
+    <p>Outil réservé aux professionnels de santé animale</p>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(item) {
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
