@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import { createClient } from '@supabase/supabase-js';
 import { streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
@@ -338,19 +337,18 @@ ${history.length > 0
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const embeddingModel = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY!,
-      modelName: 'text-embedding-3-small',
-    });
-
-    // Vector search — call match_documents RPC directly with the correct signature.
-    // The function in Supabase uses (query_embedding, match_count, filter), NOT match_threshold.
-    // LangChain's SupabaseVectorStore sends match_threshold which causes a 404 — so we call directly.
+    // Vector search — direct OpenAI embeddings API, no langchain dependency
     let context = '';
     let sources: ReturnType<typeof resolveSource>[] = [];
     try {
-      // 1. Embed the question
-      const queryEmbedding = await embeddingModel.embedQuery(question);
+      // 1. Embed the question via OpenAI REST API directly
+      const embedRes = await fetch('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: 'text-embedding-3-small', input: question }),
+      });
+      const embédJson = await embedRes.json();
+      const queryEmbedding: number[] = embédJson.data?.[0]?.embedding;
 
       // 2. Call match_documents with the actual function signature
       const { data: rows, error: rpcError } = await supabase.rpc('match_documents', {
