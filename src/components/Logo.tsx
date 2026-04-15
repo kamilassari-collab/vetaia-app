@@ -61,10 +61,10 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill={navy}
         letterSpacing="-0.5"
       >
-        Vet
+        Veta
       </text>
       <text
-        x="190"
+        x="214"
         y="72"
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize="52"
@@ -72,7 +72,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill={teal}
         letterSpacing="-0.5"
       >
-        aia
+        IA
       </text>
     </svg>
   );
