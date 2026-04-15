@@ -9,7 +9,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Leash AI — L'assistant IA des vétérinaires",
+  title: "Vetaia — L'assistant IA des vétérinaires",
   description: "Comptes-rendus automatiques, prise de rendez-vous téléphonique, gestion des dossiers. Entraîné sur de vraies données vétérinaires.",
 };
 

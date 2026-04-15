@@ -227,7 +227,7 @@ export default function DemoPage() {
                 <div className="demo-msg-ai" style={{ maxWidth: '85%' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                     <Logo mark height={18} dark />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: '#4DBFB0', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Leash AI</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: '#4DBFB0', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Vetaia</span>
                   </div>
                   <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px 16px 16px 16px' }}>
                     {msg.content

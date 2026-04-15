@@ -1,4 +1,4 @@
-// Leash AI logo — from Figma export
+// Vetaia logo — from Figma export
 // Usage:
 //   <Logo />              full wordmark at default size
 //   <Logo height={28} />  scale by height
@@ -25,7 +25,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={className}
-        aria-label="Leash AI"
+        aria-label="Vetaia"
       >
         <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill={teal} />
         <path d="M 30 0 L 60 0 L 60 30 L 30 60 L 30 30 Z" fill={navy} />
@@ -34,7 +34,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
   }
 
   // Full wordmark — viewBox tightened to actual content bounds
-  const viewW = 290;
+  const viewW = 265;
   const viewH = 90;
   const width = (height / viewH) * viewW;
 
@@ -46,7 +46,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Leash AI"
+      aria-label="Vetaia"
     >
       <g transform="translate(15, 30)">
         <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill={teal} />
@@ -61,10 +61,10 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill={navy}
         letterSpacing="-0.5"
       >
-        Leash
+        Vet
       </text>
       <text
-        x="246"
+        x="190"
         y="72"
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize="52"
@@ -72,7 +72,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill={teal}
         letterSpacing="-0.5"
       >
-        AI
+        aia
       </text>
     </svg>
   );

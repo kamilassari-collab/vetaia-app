@@ -34,7 +34,7 @@ function MiniChatDemo() {
       <div style={{ padding: '14px 20px', borderBottom: '1px solid #DDD9CF', display: 'flex', alignItems: 'center', gap: 10, background: '#FAFAF8' }}>
         <Logo mark height={32} />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#111D1B', fontFamily: "'DM Sans', sans-serif" }}>Leash AI — Assistant vétérinaire</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#111D1B', fontFamily: "'DM Sans', sans-serif" }}>Vetaia — Assistant vétérinaire</div>
           <div style={{ fontSize: 11, color: '#7A9490', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
             En ligne · Répond en quelques secondes
@@ -184,7 +184,7 @@ export function HeroSection() {
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#0B7A6A', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 0 2px rgba(34,197,94,0.2)' }} />
-                Essayez Leash AI maintenant — aucun compte requis
+                Essayez Vetaia maintenant — aucun compte requis
               </span>
             </div>
             <MiniChatDemo />

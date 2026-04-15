@@ -55,7 +55,7 @@ export function Footer() {
         <div>
           <div style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)', marginBottom: 16 }}>Avertissement</div>
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.75 }}>
-            Leash AI est un outil d&apos;aide à la décision destiné <strong style={{ color: 'rgba(255,255,255,0.45)' }}>exclusivement aux vétérinaires diplômés</strong>. Il ne remplace pas le jugement clinique professionnel.
+            Vetaia est un outil d&apos;aide à la décision destiné <strong style={{ color: 'rgba(255,255,255,0.45)' }}>exclusivement aux vétérinaires diplômés</strong>. Il ne remplace pas le jugement clinique professionnel.
           </p>
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11.5, color: 'rgba(255,255,255,0.14)', lineHeight: 1.75, marginTop: 10 }}>
             Conforme au cadre de l&apos;Ordre National des Vétérinaires (ONV) et aux directives ANSES sur les outils d&apos;aide à la prescription.
@@ -67,7 +67,7 @@ export function Footer() {
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '20px 40px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>
-            © {new Date().getFullYear()} Leash AI — Tous droits réservés
+            © {new Date().getFullYear()} Vetaia — Tous droits réservés
           </p>
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.1)', maxWidth: 520, textAlign: 'right', lineHeight: 1.6 }}>
             Outil réservé aux professionnels de santé animale · Les informations fournies ne constituent pas un avis médical opposable · Usage professionnel uniquement

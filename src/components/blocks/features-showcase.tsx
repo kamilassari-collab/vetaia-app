@@ -94,7 +94,7 @@ function ReportDemo() {
           <span key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, display: 'inline-block' }} />
         ))}
         <span style={{ marginLeft: 8, fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: "'DM Sans', sans-serif" }}>
-          Leash AI — Compte-rendu consultation
+          Vetaia — Compte-rendu consultation
         </span>
         <div style={{ marginLeft: 'auto' }}>
           <AnimatePresence mode="wait">
@@ -191,7 +191,7 @@ function ReportDemo() {
 // ─── Phone Demo ───────────────────────────────────────────────────────────────
 const PHONE_MSGS = [
   { from: 'client', text: 'Bonjour, je voudrais un rdv pour mon chat, il mange plus depuis hier soir.' },
-  { from: 'ai', text: "Bonjour ! Je suis l'assistant Leash AI. Quel est le prénom et l'âge de votre chat ?" },
+  { from: 'ai', text: "Bonjour ! Je suis l'assistant Vetaia. Quel est le prénom et l'âge de votre chat ?" },
   { from: 'client', text: "Il s'appelle Milo, 3 ans. Il est aussi un peu léthargique depuis ce matin." },
   { from: 'ai', text: "Merci. Je note : anorexie + léthargie chez Milo, 3 ans. Je vérifie les disponibilités du Dr. Vasseur..." },
 ];
@@ -361,7 +361,7 @@ function DossierDemo() {
       {/* Top bar — two apps side by side */}
       <div style={{ background: '#111D1B', padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 0 }}>
         {['#FF5F57', '#FEBC2E', '#28C840'].map(c => <span key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c, display: 'inline-block', marginRight: 4 }} />)}
-        <span style={{ marginLeft: 8, fontSize: 10.5, color: 'rgba(255,255,255,0.3)' }}>Leash AI</span>
+        <span style={{ marginLeft: 8, fontSize: 10.5, color: 'rgba(255,255,255,0.3)' }}>Vetaia</span>
         <span style={{ margin: '0 10px', color: 'rgba(255,255,255,0.12)', fontSize: 14 }}>│</span>
         <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.3)' }}>Vetup — Dossier patient</span>
         <AnimatePresence mode="wait">
@@ -384,7 +384,7 @@ function DossierDemo() {
       {/* Split body */}
       <div className="dossier-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', minHeight: 260 }}>
 
-        {/* LEFT — Leash AI transcript */}
+        {/* LEFT — Vetaia transcript */}
         <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
             <motion.div
@@ -705,7 +705,7 @@ export function FeaturesShowcase() {
       <FeatureSection
         n="02" badge="Réceptionniste IA"
         title={<>Plus d&apos;appels manqués,<br /><em style={{ fontStyle: 'italic', fontWeight: 300, color: '#4DBFB0' }}>jamais.</em></>}
-        desc="Pendant vos consultations, Leash AI décroche, qualifie l'urgence, collecte les informations patient et confirme le rendez-vous — sans intervention humaine, en français naturel, 24h/24."
+        desc="Pendant vos consultations, Vetaia décroche, qualifie l'urgence, collecte les informations patient et confirme le rendez-vous — sans intervention humaine, en français naturel, 24h/24."
         cta="Voir une démo"
         demo={<PhoneDemo />}
         reverse dark comingSoon notifyFeature="Réceptionniste IA"
@@ -714,7 +714,7 @@ export function FeaturesShowcase() {
       <FeatureSection
         n="03" badge="Dossiers patients"
         title={<>Dossiers patients<br /><em style={{ fontStyle: 'italic', fontWeight: 300, color: '#0B7A6A' }}>mis à jour automatiquement</em></>}
-        desc="Après chaque consultation, Leash AI met à jour le dossier et l'exporte automatiquement dans votre logiciel — vaccins, ordonnances, constantes, compte-rendu. Compatible avec Vetup, VetManager, Vet-Instant, Intravet et plus."
+        desc="Après chaque consultation, Vetaia met à jour le dossier et l'exporte automatiquement dans votre logiciel — vaccins, ordonnances, constantes, compte-rendu. Compatible avec Vetup, VetManager, Vet-Instant, Intravet et plus."
         cta="Découvrir les intégrations"
         demo={<DossierDemo />}
         comingSoon notifyFeature="Dossiers patients"
