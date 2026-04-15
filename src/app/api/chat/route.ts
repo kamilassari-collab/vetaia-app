@@ -408,29 +408,26 @@ ${history.length > 0
 
       type RawRow = { id: number; content: string; metadata: Record<string, string>; similarity: number };
 
-      // FLYWHEEL: 2a. Search clinic-specific knowledge first (3 results)
-      let clinicRows: RawRow[] = [];
-      if (userId) {
-        try {
-          const { data: ckRows } = await supabase.rpc('match_clinic_knowledge', {
-            query_embedding: queryEmbedding,
-            p_user_id: userId,
-            match_threshold: 0.35,
-            match_count: 3,
-          });
-          if (ckRows) clinicRows = ckRows as RawRow[];
-          console.log('[FLYWHEEL] clinic_knowledge:', clinicRows.length, 'rows');
-        } catch (ckErr) {
-          console.warn('[FLYWHEEL] clinic_knowledge search failed:', ckErr);
-        }
-      }
+      // FLYWHEEL: 2a+2b. Search clinic knowledge AND common base in parallel
+      const [clinicResult, commonResult] = await Promise.all([
+        userId
+          ? Promise.resolve(supabase.rpc('match_clinic_knowledge', {
+              query_embedding: queryEmbedding,
+              p_user_id: userId,
+              match_threshold: 0.35,
+              match_count: 3,
+            })).catch((e: unknown) => { console.warn('[FLYWHEEL] clinic_knowledge failed:', e); return { data: null }; })
+          : Promise.resolve({ data: null }),
+        supabase.rpc('match_documents', {
+          query_embedding: queryEmbedding,
+          match_count: 12,
+          filter: {},
+        }),
+      ]);
 
-      // 2b. Search common knowledge base (5 results)
-      const { data: rows, error: rpcError } = await supabase.rpc('match_documents', {
-        query_embedding: queryEmbedding,
-        match_count: 12,
-        filter: {},
-      });
+      const clinicRows: RawRow[] = (clinicResult.data as RawRow[] | null) ?? [];
+      const { data: rows, error: rpcError } = commonResult;
+      console.log('[FLYWHEEL] clinic_knowledge:', clinicRows.length, 'rows');
 
       if (rpcError) throw new Error(rpcError.message);
 

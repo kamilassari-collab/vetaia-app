@@ -14,20 +14,34 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [unconfirmed, setUnconfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setUnconfirmed(false);
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      setError('Identifiants incorrects.');
+      if (authError.message.toLowerCase().includes('email not confirmed') || authError.message.toLowerCase().includes('not confirmed')) {
+        setUnconfirmed(true);
+      } else {
+        setError('Identifiants incorrects.');
+      }
       setLoading(false);
       return;
     }
-    localStorage.setItem('leash-demo-auth', 'true');
     router.push('/chat');
+  }
+
+  async function handleResend() {
+    setResendLoading(true);
+    await supabase.auth.resend({ type: 'signup', email });
+    setResendLoading(false);
+    setResendSent(true);
   }
 
   return (
@@ -84,6 +98,18 @@ function LoginForm() {
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required autoComplete="current-password" />
             </div>
             {error && <div className="error">{error}</div>}
+            {unconfirmed && (
+              <div style={{ background: '#FFFBEB', border: '1px solid #FCD34D', borderRadius: 8, padding: '12px 14px', marginBottom: 14, fontSize: 13, color: '#92400E', lineHeight: 1.6 }}>
+                <strong>Email non confirmé.</strong> Vérifiez votre boîte mail et cliquez sur le lien de confirmation.
+                {!resendSent ? (
+                  <button onClick={handleResend} disabled={resendLoading} style={{ display: 'block', marginTop: 8, background: 'none', border: 'none', color: '#0B7A6A', fontWeight: 600, fontSize: 13, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                    {resendLoading ? 'Envoi…' : '↻ Renvoyer l\'email de confirmation'}
+                  </button>
+                ) : (
+                  <span style={{ display: 'block', marginTop: 8, color: '#0B7A6A', fontWeight: 600 }}>✓ Email renvoyé !</span>
+                )}
+              </div>
+            )}
             <button type="submit" className="btn-primary" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
               {loading ? 'Connexion…' : 'Se connecter'}
             </button>
