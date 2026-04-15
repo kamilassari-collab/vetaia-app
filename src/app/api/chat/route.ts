@@ -184,10 +184,51 @@ function headerJSON(value: unknown): string {
   );
 }
 
+// ─── FLYWHEEL: Supabase service client (shared) ────────────────────────────────
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+// ─── FLYWHEEL: Extract authenticated user_id from Bearer token ─────────────────
+async function getUserId(req: NextRequest): Promise<string | null> {
+  try {
+    const auth = req.headers.get('authorization') ?? '';
+    const token = auth.replace('Bearer ', '').trim();
+    if (!token) return null;
+    const { data } = await getServiceClient().auth.getUser(token);
+    return data.user?.id ?? null;
+  } catch { return null; }
+}
+
+// ─── FLYWHEEL: mark_accepted ────────────────────────────────────────────────────
+export async function markAccepted(interactionId: string) {
+  try {
+    await getServiceClient()
+      .from('rag_interactions')
+      .update({ feedback_type: 'accepted' })
+      .eq('id', interactionId);
+  } catch (e) { console.warn('[FLYWHEEL] markAccepted failed:', e); }
+}
+
+// ─── FLYWHEEL: mark_edited ─────────────────────────────────────────────────────
+export async function markEdited(interactionId: string, correctedText: string) {
+  try {
+    await getServiceClient()
+      .from('rag_interactions')
+      .update({ feedback_type: 'edited', response_corrected: correctedText })
+      .eq('id', interactionId);
+  } catch (e) { console.warn('[FLYWHEEL] markEdited failed:', e); }
+}
+
 // ─── Route ──────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const { question, patientId, consultationId } = await req.json();
+    // ─── FLYWHEEL: resolve authenticated user ──────────────────────────────────
+    const userId = await getUserId(req);
     if (!question) return new Response(JSON.stringify({ error: 'No question provided' }), { status: 400 });
 
     // ── Rate limit check ───────────────────────────────────────────────────────
@@ -318,6 +359,23 @@ ${history.length > 0
           if (consultationId && text) {
             await updateConsultationReport(consultationId, text, rawNotesForReport || undefined);
           }
+          // FLYWHEEL: log SOAP feedback
+          if (userId && text) {
+            try {
+              const sections = ['subjective', 'objective', 'assessment', 'plan'];
+              const soapBlocks = text.split(/\*\*[SOAP].*?\*\*/);
+              await Promise.all(sections.map((section, i) => {
+                const generated = soapBlocks[i + 1]?.trim() ?? '';
+                if (!generated) return Promise.resolve();
+                return getServiceClient().from('soap_notes_feedback').insert({
+                  user_id: userId,
+                  section,
+                  generated,
+                  was_accepted: null,
+                });
+              }));
+            } catch (e) { console.warn('[FLYWHEEL] soap_notes_feedback insert failed:', e); }
+          }
         },
       });
 
@@ -332,14 +390,12 @@ ${history.length > 0
     }
 
     // ── Handle QUESTION (default RAG flow) ────────────────────────────────────
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = getServiceClient();
 
     // Vector search — direct OpenAI embeddings API, no langchain dependency
     let context = '';
     let sources: ReturnType<typeof resolveSource>[] = [];
+    let retrievedChunks: unknown[] = []; // FLYWHEEL
     try {
       // 1. Embed the question via OpenAI REST API directly
       const embedRes = await fetch('https://api.openai.com/v1/embeddings', {
@@ -350,7 +406,26 @@ ${history.length > 0
       const embédJson = await embedRes.json();
       const queryEmbedding: number[] = embédJson.data?.[0]?.embedding;
 
-      // 2. Call match_documents with the actual function signature
+      type RawRow = { id: number; content: string; metadata: Record<string, string>; similarity: number };
+
+      // FLYWHEEL: 2a. Search clinic-specific knowledge first (3 results)
+      let clinicRows: RawRow[] = [];
+      if (userId) {
+        try {
+          const { data: ckRows } = await supabase.rpc('match_clinic_knowledge', {
+            query_embedding: queryEmbedding,
+            p_user_id: userId,
+            match_threshold: 0.35,
+            match_count: 3,
+          });
+          if (ckRows) clinicRows = ckRows as RawRow[];
+          console.log('[FLYWHEEL] clinic_knowledge:', clinicRows.length, 'rows');
+        } catch (ckErr) {
+          console.warn('[FLYWHEEL] clinic_knowledge search failed:', ckErr);
+        }
+      }
+
+      // 2b. Search common knowledge base (5 results)
       const { data: rows, error: rpcError } = await supabase.rpc('match_documents', {
         query_embedding: queryEmbedding,
         match_count: 12,
@@ -361,19 +436,21 @@ ${history.length > 0
 
       console.log('[api/chat] RAG: got', rows?.length ?? 0, 'rows from match_documents');
 
-      // 3. Score is returned as `similarity` column — filter and deduplicate
-      type RawRow = { id: number; content: string; metadata: Record<string, string>; similarity: number };
-      const relevant: RawRow[] = (rows as RawRow[]).filter((r: RawRow) =>
+      // 3. Merge: clinic results first, then common — filter and deduplicate
+      const commonRows: RawRow[] = (rows as RawRow[]).filter((r: RawRow) =>
         r.similarity >= 0.35 &&
-        // Never use internal SOAP templates for Q&A — they're only for report generation
         !String(r.metadata?.filename ?? '').includes('compte-rendus-types')
-      );
+      ).slice(0, 5); // FLYWHEEL: limit common to 5
+
+      // FLYWHEEL: clinic results prepended
+      const allRows = [...clinicRows, ...commonRows];
 
       const MAX_CONTEXT_CHARS = 6000;
-      context = relevant.map((r: RawRow) => r.content).join('\n\n---\n\n').slice(0, MAX_CONTEXT_CHARS);
+      context = allRows.map((r: RawRow) => r.content).join('\n\n---\n\n').slice(0, MAX_CONTEXT_CHARS);
+      retrievedChunks = allRows.map((r: RawRow) => ({ content: r.content.slice(0, 200), similarity: r.similarity })); // FLYWHEEL
 
       const seen = new Set<string>();
-      sources = relevant
+      sources = allRows
         .filter((r: RawRow) => {
           const fn = r.metadata?.filename ?? '';
           if (seen.has(fn)) return false;
@@ -421,6 +498,19 @@ ${context || "Aucun document spécifique trouvé. Utilise tes connaissances vét
         { role: 'system', content: systemContent },
         { role: 'user', content: question },
       ],
+      // FLYWHEEL: log interaction after response is complete
+      onFinish: async ({ text }) => {
+        if (!userId || !text) return;
+        try {
+          await getServiceClient().from('rag_interactions').insert({
+            user_id: userId,
+            query: question,
+            response_generated: text,
+            retrieved_chunks: retrievedChunks,
+            feedback_type: 'pending',
+          });
+        } catch (e) { console.warn('[FLYWHEEL] rag_interactions insert failed:', e); }
+      },
     });
 
     return result.toTextStreamResponse({
