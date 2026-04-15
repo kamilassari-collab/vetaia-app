@@ -105,7 +105,36 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
           {!isStreaming && (
             <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderTop: '1px solid #F1F5F9', background: '#FAFBFC' }}>
               <button onClick={copyText} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', border: '1px solid #E2E8F0', borderRadius: 7, background: 'white', fontSize: 11.5, color: '#6B8F8A', cursor: 'pointer', fontFamily: 'inherit' }}><Copy size={11} /> Copier</button>
-              <button onClick={() => { const blob = new Blob([`<pre style="font-family:monospace;padding:32px;white-space:pre-wrap">${content}</pre>`], { type: 'text/html' }); const url = URL.createObjectURL(blob); const w = window.open(url, '_blank'); setTimeout(() => { w?.print(); URL.revokeObjectURL(url); }, 400); }} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', border: '1px solid #E2E8F0', borderRadius: 7, background: 'white', fontSize: 11.5, color: '#6B8F8A', cursor: 'pointer', fontFamily: 'inherit' }}><Printer size={11} /> PDF</button>
+              <button onClick={() => {
+                const md = content
+                  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                  .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                  .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                  .replace(/^- (.+)$/gm, '<li>$1</li>')
+                  .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+                  .replace(/\n\n/g, '</p><p>')
+                  .replace(/\n/g, '<br/>');
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Compte-rendu SOAP</title><style>
+                  body{font-family:'Helvetica Neue',Arial,sans-serif;max-width:700px;margin:40px auto;padding:0 32px;color:#111;font-size:14px;line-height:1.7}
+                  h1,h2,h3{color:#0B7A6A;margin-top:24px;margin-bottom:6px}
+                  h2{font-size:15px;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
+                  ul{padding-left:20px;margin:8px 0}li{margin:4px 0}
+                  strong{color:#111}p{margin:8px 0}
+                  .header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0B7A6A;padding-bottom:12px;margin-bottom:24px}
+                  .brand{font-size:18px;font-weight:700;color:#111}.brand span{color:#0B7A6A}
+                  .date{font-size:12px;color:#666}
+                  @media print{body{margin:20px}}
+                </style></head><body>
+                <div class="header"><div class="brand">Veta<span>IA</span></div><div class="date">${new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'})}</div></div>
+                <p>${md}</p>
+                </body></html>`;
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const w = window.open(url, '_blank');
+                setTimeout(() => { w?.print(); URL.revokeObjectURL(url); }, 500);
+              }} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', border: '1px solid #E2E8F0', borderRadius: 7, background: 'white', fontSize: 11.5, color: '#6B8F8A', cursor: 'pointer', fontFamily: 'inherit' }}><Printer size={11} /> PDF</button>
             </div>
           )}
         </div>
