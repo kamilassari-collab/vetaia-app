@@ -592,7 +592,7 @@ function ChatInner() {
 
           {/* Logo */}
           <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid #EDF1F5', flexShrink: 0 }}>
-            <Logo height={22} />
+            <Logo height={30} />
           </div>
 
           {/* Nav */}

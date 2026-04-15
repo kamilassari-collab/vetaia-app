@@ -57,7 +57,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         y="72"
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize="52"
-        fontWeight="600"
+        fontWeight="700"
         fill={navy}
         letterSpacing="-0.5"
       >
@@ -68,7 +68,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         y="72"
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize="52"
-        fontWeight="600"
+        fontWeight="700"
         fill={teal}
         letterSpacing="-0.5"
       >

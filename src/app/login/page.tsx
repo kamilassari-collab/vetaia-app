@@ -57,7 +57,7 @@ function LoginForm() {
       <div className="page">
         <div className="card">
           <div className="logo-row">
-            <Logo height={34} />
+            <Logo height={44} />
             <span className="beta">BETA</span>
           </div>
 

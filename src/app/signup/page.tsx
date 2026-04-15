@@ -79,7 +79,7 @@ export default function SignupPage() {
       <div className="page">
         <div className="card">
           <div className="logo-row">
-            <Logo height={28} />
+            <Logo height={38} />
             <span className="beta">BETA</span>
           </div>
           <div className="title">Créer votre compte</div>
