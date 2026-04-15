@@ -43,7 +43,7 @@ const SOURCE_LABELS: Record<string, { name: string; url: string; type: string }>
   'virbac_pro_cas_cliniques':        { name: 'Virbac Pro — Cas cliniques vétérinaires FR',  url: 'https://pro-fr.virbac.com/home/ressources-scientifiques/cas-cliniques.html', type: 'Cas cliniques FR' },
   'msd_vet_manual_fr':               { name: 'MSD Vet Manual — Version française',          url: 'https://www.msdvetmanual.com/fr/index',                               type: 'Reference' },
   // Internal
-  'compte-rendus-types': { name: 'Vetaia — Templates SOAP vétérinaires', url: '', type: 'Interne' },
+  'compte-rendus-types': { name: 'VetaIA — Templates SOAP vétérinaires', url: '', type: 'Interne' },
 };
 
 function autoDerive(stem: string): { name: string; url: string; type: string } {
@@ -154,7 +154,7 @@ function detectIntent(question: string): Intent {
 }
 
 // ─── System prompts ───────────────────────────────────────────────────────────────
-const REPORT_SYSTEM_PROMPT = `Tu es un assistant vétérinaire expert spécialisé dans la rédaction de comptes rendus cliniques pour Vetaia.
+const REPORT_SYSTEM_PROMPT = `Tu es un assistant vétérinaire expert spécialisé dans la rédaction de comptes rendus cliniques pour VetaIA.
 
 RÈGLE CRITIQUE : Détecte la langue de la question et réponds EXCLUSIVEMENT dans cette même langue.
 
@@ -252,7 +252,7 @@ ${history.length > 0
         messages: [
           {
             role: 'system',
-            content: `Tu es Vetaia, un assistant clinique vétérinaire. Réponds de façon naturelle et concise à cette question conversationnelle. Si la question est vague ("tu as plus d'infos ?", "peux-tu préciser ?"), demande poliment de quelle pathologie, molécule ou cas clinique il s'agit pour pouvoir t'être utile.${patientContext ? `\n\n${patientContext}` : ''}`,
+            content: `Tu es VetaIA, un assistant clinique vétérinaire. Réponds de façon naturelle et concise à cette question conversationnelle. Si la question est vague ("tu as plus d'infos ?", "peux-tu préciser ?"), demande poliment de quelle pathologie, molécule ou cas clinique il s'agit pour pouvoir t'être utile.${patientContext ? `\n\n${patientContext}` : ''}`,
           },
           { role: 'user', content: question },
         ],
@@ -398,7 +398,7 @@ ${history.length > 0
       sources: sources.map(s => s.name),
     });
 
-    const systemContent = `Tu es Vetaia, un assistant clinique vétérinaire expert. Tu t'adresses EXCLUSIVEMENT à des vétérinaires diplômés et praticiens — jamais à des propriétaires d'animaux ou au grand public.
+    const systemContent = `Tu es VetaIA, un assistant clinique vétérinaire expert. Tu t'adresses EXCLUSIVEMENT à des vétérinaires diplômés et praticiens — jamais à des propriétaires d'animaux ou au grand public.
 
 RÈGLE CRITIQUE : Détecte la langue de la question et réponds EXCLUSIVEMENT dans cette même langue. Question en français → réponse en français. Question en anglais → réponse en anglais.
 

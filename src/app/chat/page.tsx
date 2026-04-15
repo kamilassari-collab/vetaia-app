@@ -119,7 +119,7 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
         <div style={{ width: 22, height: 22, borderRadius: 6, background: '#E8F5F0', border: '1px solid #BBE0D6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Logo mark height={11} /></div>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>Vetaia</span>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>VetaIA</span>
       </div>
       <div className="ai-bubble">
         <div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown></div>
@@ -924,7 +924,7 @@ function ChatInner() {
                         <div style={{ textAlign: 'center' }}>
                           <p style={{ fontSize: 16, fontWeight: 600, color: '#364152', margin: '0 0 6px' }}>Démarrer l&apos;enregistrement</p>
                           <p style={{ fontSize: 13, color: '#94A3B8', margin: 0, maxWidth: 340, lineHeight: 1.6 }}>
-                            Dictez vos observations pendant la consultation. Vetaia génère automatiquement le compte-rendu SOAP.
+                            Dictez vos observations pendant la consultation. VetaIA génère automatiquement le compte-rendu SOAP.
                           </p>
                         </div>
                       </motion.div>
@@ -1011,7 +1011,7 @@ function ChatInner() {
                   </div>
                 </motion.div>
                 <div style={{ textAlign: 'center', marginTop: 8, fontSize: 11, color: '#CBD5E0' }}>
-                  Vetaia peut faire des erreurs — vérifiez toujours les informations cliniques critiques.
+                  VetaIA peut faire des erreurs — vérifiez toujours les informations cliniques critiques.
                 </div>
               </div>
             </div>

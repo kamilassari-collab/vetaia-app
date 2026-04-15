@@ -1,4 +1,4 @@
-// Vetaia logo — from Figma export
+// VetaIA logo — from Figma export
 // Usage:
 //   <Logo />              full wordmark at default size
 //   <Logo height={28} />  scale by height
@@ -25,7 +25,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={className}
-        aria-label="Vetaia"
+        aria-label="VetaIA"
       >
         <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill={teal} />
         <path d="M 30 0 L 60 0 L 60 30 L 30 60 L 30 30 Z" fill={navy} />
@@ -46,7 +46,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Vetaia"
+      aria-label="VetaIA"
     >
       <g transform="translate(15, 30)">
         <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill={teal} />

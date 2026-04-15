@@ -70,7 +70,7 @@ function Hero() {
               style={{ color: "#6B8A88", fontFamily: "'Manrope', sans-serif", lineHeight: 1.75 }}
             >
               Comptes-rendus automatiques, prise de rendez-vous téléphonique, gestion des dossiers —
-              Vetaia est entraîné sur de vraies données cliniques vétérinaires pour vous faire gagner
+              VetaIA est entraîné sur de vraies données cliniques vétérinaires pour vous faire gagner
               2 heures par jour.
             </p>
           </div>

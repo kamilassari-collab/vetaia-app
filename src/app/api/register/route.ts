@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'Vetaia <onboarding@resend.dev>',
+          from: 'VetaIA <onboarding@resend.dev>',
           to: [email],
-          subject: 'Bienvenue sur Vetaia 🐾',
+          subject: 'Bienvenue sur VetaIA 🐾',
           html: `
             <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 24px; color: #111D1B;">
               <div style="margin-bottom: 32px;">
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
                 Bienvenue, Dr. ${firstName} ${lastName} 👋
               </h1>
               <p style="font-size: 15px; color: #4A6460; line-height: 1.7; margin-bottom: 24px;">
-                Votre compte Vetaia est activé. Vous pouvez dès maintenant vous connecter et générer vos premiers comptes-rendus vétérinaires en 30 secondes.
+                Votre compte VetaIA est activé. Vous pouvez dès maintenant vous connecter et générer vos premiers comptes-rendus vétérinaires en 30 secondes.
               </p>
               <a href="https://leash-ai-website.vercel.app/login" style="display: inline-block; background: #0B7A6A; color: white; text-decoration: none; padding: 13px 28px; border-radius: 10px; font-size: 14px; font-weight: 500;">
                 Accéder à mon espace →

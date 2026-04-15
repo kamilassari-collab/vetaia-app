@@ -15,7 +15,7 @@ function ReportMockup() {
         <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F57", display: "inline-block" }} />
         <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FEBC2E", display: "inline-block" }} />
         <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28C840", display: "inline-block" }} />
-        <span style={{ marginLeft: 10, fontSize: 11.5, color: "rgba(255,255,255,0.45)", fontWeight: 500 }}>Vetaia — Compte-rendu</span>
+        <span style={{ marginLeft: 10, fontSize: 11.5, color: "rgba(255,255,255,0.45)", fontWeight: 500 }}>VetaIA — Compte-rendu</span>
       </div>
       <div style={{ padding: 20 }}>
         {/* Patient */}
@@ -63,7 +63,7 @@ function PhoneMockup() {
         <div style={{ background: "#0B7A6A", color: "white", borderRadius: "12px 4px 12px 12px", padding: "10px 14px", fontSize: 12.5, lineHeight: 1.55, alignSelf: "flex-end", maxWidth: "85%" }}>
           Bonjour, je voudrais un rdv pour mon chat, il mange plus depuis hier
         </div>
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: -4 }}>Vetaia</div>
+        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", marginBottom: -4 }}>VetaIA</div>
         <div style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.82)", borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 12.5, lineHeight: 1.55, maxWidth: "85%" }}>
           Bien sûr. Quel est le prénom et l&apos;âge de votre chat ? A-t-il d&apos;autres symptômes ?
         </div>
@@ -138,7 +138,7 @@ const tabs = [
     label: "Rapports automatiques",
     badge: "IA Clinique",
     title: "Compte-rendu rédigé en 30 secondes.",
-    description: "Dictez ou tapez vos observations — Vetaia génère un compte-rendu complet avec anamnèse, examen clinique et plan thérapeutique en terminologie vétérinaire certifiée.",
+    description: "Dictez ou tapez vos observations — VetaIA génère un compte-rendu complet avec anamnèse, examen clinique et plan thérapeutique en terminologie vétérinaire certifiée.",
     buttonText: "Réserver une démo",
     preview: <ReportMockup />,
   },
@@ -148,7 +148,7 @@ const tabs = [
     label: "Prise de RDV IA",
     badge: "Réceptionniste 24/7",
     title: "Votre réceptionniste disponible la nuit.",
-    description: "Vetaia décroche, comprend la demande, pose les bonnes questions et confirme le rendez-vous sans intervention humaine. En français naturel, 24h/24.",
+    description: "VetaIA décroche, comprend la demande, pose les bonnes questions et confirme le rendez-vous sans intervention humaine. En français naturel, 24h/24.",
     buttonText: "Voir comment ça marche",
     preview: <PhoneMockup />,
   },
