@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { Logo } from '@/components/Logo';
 
 function LoginForm() {
   const router = useRouter();
@@ -58,31 +59,14 @@ function LoginForm() {
           justify-content: center;
           background: #fff;
           padding: 24px;
+          position: relative;
         }
 
-        .logo-wrap {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 40px;
+        .logo-corner {
+          position: absolute;
+          top: 28px;
+          left: 32px;
         }
-        .logo-mark {
-          width: 26px;
-          height: 26px;
-          background: #0B7A6A;
-          border-radius: 7px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .logo-mark svg { width: 14px; height: 14px; }
-        .logo-name {
-          font-size: 15px;
-          font-weight: 600;
-          color: #111;
-          letter-spacing: -0.01em;
-        }
-        .logo-name span { color: #0B7A6A; }
 
         .form-wrap {
           width: 100%;
@@ -249,13 +233,8 @@ function LoginForm() {
       `}</style>
 
       <div className="page">
-        <div className="logo-wrap">
-          <div className="logo-mark">
-            <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 2C7 2 4 4.5 4 7.5C4 9.43 5.34 11 7 11C8.66 11 10 9.43 10 7.5C10 4.5 7 2 7 2Z" fill="white" fillOpacity="0.9"/>
-            </svg>
-          </div>
-          <span className="logo-name">Veta<span>IA</span></span>
+        <div className="logo-corner">
+          <Logo height={38} />
         </div>
 
         <div className="form-wrap">
