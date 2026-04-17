@@ -233,9 +233,9 @@ function LoginForm() {
       `}</style>
 
       <div className="page">
-        <div className="logo-corner">
+        <Link href="/" className="logo-corner" style={{ textDecoration: 'none' }}>
           <Logo height={38} />
-        </div>
+        </Link>
 
         <div className="form-wrap">
           <h1 className="heading">Connexion</h1>
