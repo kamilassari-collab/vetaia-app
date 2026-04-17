@@ -48,7 +48,7 @@ export function Logo({ height = 36, mark = false, dark = false, className }: Log
       className={className}
       aria-label="VetaIA"
     >
-      <g transform="translate(15, 30)">
+      <g transform="translate(15, 24)">
         <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill={teal} />
         <path d="M 30 0 L 60 0 L 60 30 L 30 60 L 30 30 Z" fill={navy} />
       </g>

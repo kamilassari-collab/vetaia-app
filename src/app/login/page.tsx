@@ -62,16 +62,15 @@ function LoginForm() {
         }
 
         .logo-corner {
-          display: block;
-          margin-bottom: 36px;
+          position: absolute;
+          top: 28px;
+          left: 32px;
+          text-decoration: none;
         }
 
         .form-wrap {
           width: 100%;
           max-width: 340px;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
         }
 
         .heading {
@@ -234,11 +233,11 @@ function LoginForm() {
       `}</style>
 
       <div className="page">
-        <div className="form-wrap">
-          <Link href="/" className="logo-corner" style={{ textDecoration: 'none' }}>
-            <Logo height={48} />
-          </Link>
+        <Link href="/" className="logo-corner">
+          <Logo height={44} />
+        </Link>
 
+        <div className="form-wrap">
           <h1 className="heading">Connexion</h1>
           <p className="subheading">pour continuer vers VetaIA</p>
 
