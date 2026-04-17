@@ -1,11 +1,10 @@
 'use client';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Patient, Consultation, speciesEmoji, calculateAge, Sex, Species } from '@/lib/patient-utils';
 import { Logo } from '@/components/Logo';
-
-const VET_ID = 'demo';
+import { supabase } from '@/lib/supabase';
 
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -17,14 +16,21 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const [editForm, setEditForm] = useState<Partial<Patient>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [starting, setStarting] = useState(false);
+  const tokenRef = useRef<string | null>(null);
+
+  const authHeader = (): Record<string, string> =>
+    tokenRef.current ? { 'Authorization': `Bearer ${tokenRef.current}` } : {};
 
   useEffect(() => {
-    if (!localStorage.getItem('leash-demo-auth')) { router.push('/login'); return; }
-    fetchData();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { router.push('/login'); return; }
+      tokenRef.current = session.access_token;
+      fetchData();
+    });
   }, [id]);
 
   async function fetchData() {
-    const res = await fetch(`/api/patients/${id}`);
+    const res = await fetch(`/api/patients/${id}`, { headers: authHeader() });
     const data = await res.json();
     setPatient(data.patient);
     setHistory(data.history ?? []);
@@ -34,14 +40,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
 
   async function handleEdit(e: React.FormEvent) {
     e.preventDefault();
-    await fetch(`/api/patients/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm) });
+    await fetch(`/api/patients/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', ...authHeader() }, body: JSON.stringify(editForm) });
     setShowEdit(false);
     fetchData();
   }
 
   async function startConsultation() {
     setStarting(true);
-    const res = await fetch('/api/consultations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ patient_id: id, vet_id: VET_ID }) });
+    const res = await fetch('/api/consultations', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader() }, body: JSON.stringify({ patient_id: id }) });
     const consultation = await res.json();
     router.push(`/chat?patientId=${id}&consultationId=${consultation.id}`);
   }

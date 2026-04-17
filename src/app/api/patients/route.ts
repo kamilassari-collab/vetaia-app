@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getPatients, createPatient } from '@/lib/patients';
+import { authenticate, unauthorized } from '@/lib/server-auth';
 
 function isTableNotFound(e: unknown): boolean {
   if (e && typeof e === 'object') {
@@ -12,29 +13,28 @@ function isTableNotFound(e: unknown): boolean {
 }
 
 export async function GET(req: NextRequest) {
-  const vetId = req.nextUrl.searchParams.get('vetId') ?? 'demo';
+  const auth = await authenticate(req);
+  if (!auth) return unauthorized();
   try {
-    const patients = await getPatients(vetId);
+    const patients = await getPatients(auth.userId);
     return Response.json(patients);
   } catch (e) {
-    if (isTableNotFound(e)) {
-      console.warn('[/api/patients] Table not found, returning empty array:', String(e));
-      return Response.json([]);
-    }
-    return Response.json({ error: String(e) }, { status: 500 });
+    if (isTableNotFound(e)) return Response.json([]);
+    return Response.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await authenticate(req);
+  if (!auth) return unauthorized();
   const body = await req.json();
   try {
-    const patient = await createPatient({ ...body, vet_id: body.vet_id ?? 'demo' });
+    const patient = await createPatient({ ...body, vet_id: auth.userId });
     return Response.json(patient);
   } catch (e) {
     if (isTableNotFound(e)) {
-      console.warn('[/api/patients POST] Table not found:', String(e));
-      return Response.json({ error: 'La table patients n\'existe pas encore. Veuillez exécuter les migrations Supabase.' }, { status: 503 });
+      return Response.json({ error: 'Table patients introuvable. Exécutez les migrations Supabase.' }, { status: 503 });
     }
-    return Response.json({ error: String(e) }, { status: 500 });
+    return Response.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

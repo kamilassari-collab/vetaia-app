@@ -334,6 +334,10 @@ function ChatInner() {
   const audioChunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const authTokenRef = useRef<string | null>(null);
+
+  const getAuthHeader = (): Record<string, string> =>
+    authTokenRef.current ? { 'Authorization': `Bearer ${authTokenRef.current}` } : {};
 
   const isRecording = recordingPhase === 'recording';
   const isPaused = recordingPhase === 'paused';
@@ -342,8 +346,10 @@ function ChatInner() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/login'); return; }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { router.push('/login'); return; }
+      authTokenRef.current = session.access_token;
+      const user = session.user;
       const meta = user.user_metadata ?? {};
       const firstName = meta.first_name ?? '';
       const lastName = meta.last_name ?? '';
@@ -368,14 +374,14 @@ function ChatInner() {
 
   useEffect(() => {
     if (!patientId) return;
-    fetch(`/api/patients/${patientId}`).then(r => r.json()).then(data => {
+    fetch(`/api/patients/${patientId}`, { headers: getAuthHeader() }).then(r => r.json()).then(data => {
       if (data.patient) setPatientBanner({ name: data.patient.name, species: data.patient.species, breed: data.patient.breed, weight_kg: data.patient.weight_kg });
     }).catch(() => {});
   }, [patientId]);
 
   useEffect(() => {
     if (!consultationId) return;
-    fetch(`/api/messages?consultationId=${consultationId}`).then(r => r.json()).then(data => {
+    fetch(`/api/messages?consultationId=${consultationId}`, { headers: getAuthHeader() }).then(r => r.json()).then(data => {
       if (Array.isArray(data) && data.length > 0) {
         const dbMessages: Message[] = data.map((m: { role: 'user' | 'assistant'; content: string; mode?: string }) => ({ role: m.role, content: m.content, mode: m.mode }));
         setConvos(prev => { const id = prev[0]?.id ?? ''; return prev.map(c => c.id === id ? { ...c, messages: dbMessages } : c); });
@@ -431,7 +437,7 @@ function ChatInner() {
 
   async function saveMessageToDB(role: 'user' | 'assistant', content: string, mode = 'chat') {
     if (!consultationId) return;
-    try { await fetch('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ consultationId, role, content, mode }) }); } catch { /* non-critical */ }
+    try { await fetch('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify({ consultationId, role, content, mode }) }); } catch { /* non-critical */ }
   }
 
   async function sendMessage(text: string) {
@@ -446,7 +452,7 @@ function ChatInner() {
     await saveMessageToDB('user', text);
 
     const fetchWithRetry = async (attempt = 1): Promise<Response> => {
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: text, patientId: patientId ?? undefined, consultationId: consultationId ?? undefined }) });
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify({ question: text, patientId: patientId ?? undefined, consultationId: consultationId ?? undefined }) });
       if (res.status >= 500 && attempt < 3) { await new Promise(r => setTimeout(r, 2000)); return fetchWithRetry(attempt + 1); }
       return res;
     };
@@ -488,7 +494,7 @@ function ChatInner() {
         setRecordingPhase('transcribing');
         try {
           const fd = new FormData(); fd.append('audio', blob, 'recording.webm');
-          const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
+          const res = await fetch('/api/transcribe', { method: 'POST', headers: getAuthHeader(), body: fd });
           const data = await res.json();
           if (data.text) { setRecordingTranscript(data.text); setRecordingPhase('idle'); return; }
         } catch { /* silent */ }

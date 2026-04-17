@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       console.warn('[/api/notify] Supabase error (table may not exist yet):', err);
     }
 
-    console.log(`[notify] Lead: ${email} — ${feature}`);
+    console.log(`[notify] New lead registered — feature: ${feature}`);
     return Response.json({ ok: true });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
