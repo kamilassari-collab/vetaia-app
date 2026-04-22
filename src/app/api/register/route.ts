@@ -26,13 +26,20 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'VetaIA <onboarding@resend.dev>',
+          from: 'VetaIA <noreply@vetaia.fr>',
           to: [email],
           subject: 'Bienvenue sur VetaIA 🐾',
           html: `
             <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 24px; color: #111D1B;">
               <div style="margin-bottom: 32px;">
-                <span style="font-size: 22px; font-weight: 600; color: #111D1B;">Veta<span style="color: #0B7A6A;">IA</span></span>
+                <svg width="106" height="36" viewBox="15 15 265 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="VetaIA">
+                  <g transform="translate(15,24)">
+                    <path d="M 0 30 L 30 0 L 30 30 L 30 60 L 0 60 Z" fill="#0B7A6A"/>
+                    <path d="M 30 0 L 60 0 L 60 30 L 30 60 L 30 30 Z" fill="#111D1B"/>
+                  </g>
+                  <text x="100" y="72" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" fill="#111D1B" letter-spacing="-0.5">Veta</text>
+                  <text x="214" y="72" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" fill="#0B7A6A" letter-spacing="-0.5">IA</text>
+                </svg>
               </div>
               <h1 style="font-size: 24px; font-weight: 400; color: #111D1B; margin-bottom: 12px;">
                 Bienvenue, Dr. ${firstName} ${lastName} 👋
