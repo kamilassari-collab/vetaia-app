@@ -53,7 +53,7 @@ function SourcePills({ sources }: { sources: Source[] }) {
               <span style={{ fontSize: 10, color: c, fontWeight: 600, marginLeft: 2 }}>{s.type}</span>
             </span>
           );
-          return s.url ? <a key={i} href={s.url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>{pill}</a> : <span key={i}>{pill}</span>;
+          return <span key={i}>{pill}</span>;
         })}
       </div>
       {open && hasExcerpts && (
@@ -101,7 +101,7 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>Compte-rendu SOAP</span>
         </div>
         <div style={{ borderRadius: '4px 14px 14px 14px', background: 'white', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-          <div style={{ padding: '16px 20px' }}><div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown></div></div>
+          <div style={{ padding: '16px 20px' }}><div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ children }) => <span>{children}</span> }}>{content}</ReactMarkdown></div></div>
           {!isStreaming && (
             <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderTop: '1px solid #F1F5F9', background: '#FAFBFC' }}>
               <button onClick={copyText} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', border: '1px solid #E2E8F0', borderRadius: 7, background: 'white', fontSize: 11.5, color: '#6B8F8A', cursor: 'pointer', fontFamily: 'inherit' }}><Copy size={11} /> Copier</button>
@@ -151,7 +151,7 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>VetaIA</span>
       </div>
       <div className="ai-bubble">
-        <div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown></div>
+        <div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ children }) => <span>{children}</span> }}>{content}</ReactMarkdown></div>
       </div>
       {sources && sources.length > 0 && <SourcePills sources={sources} />}
     </div>
