@@ -12,6 +12,9 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "VetaIA — L'assistant IA des vétérinaires",
   description: "Comptes-rendus automatiques, prise de rendez-vous téléphonique, gestion des dossiers. Entraîné sur de vraies données vétérinaires.",
+  verification: {
+    google: "rusil4AYXanKM7LUyBPMdHP5hSfoO1VZfxKNbWx6sWE",
+  },
 };
 
 export default function RootLayout({
