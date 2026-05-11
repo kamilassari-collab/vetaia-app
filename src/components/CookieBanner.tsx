@@ -86,9 +86,9 @@ export function CookieBanner() {
               </div>
             </div>
             <p style={{ fontSize: 13.5, lineHeight: 1.65, color: '#6B7280', margin: 0 }}>
-              Nous utilisons des cookies pour faire fonctionner le site et, avec votre accord, analyser comment vous l'utilisez afin de l'améliorer.{' '}
+              Nous utilisons des cookies pour assurer le bon fonctionnement du service et, avec votre accord, mesurer l'audience afin d'améliorer votre expérience.{' '}
               <Link href="/confidentialite" target="_blank" style={{ color: '#0B7A6A', textDecoration: 'none', fontWeight: 500 }}>
-                Politique de confidentialité →
+                En savoir plus →
               </Link>
             </p>
           </div>
@@ -107,7 +107,7 @@ export function CookieBanner() {
                     Cookies essentiels
                   </div>
                   <div style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 1.55 }}>
-                    Authentification et session utilisateur (Supabase). Nécessaires au fonctionnement de l'application.
+                    Maintien de votre session et sécurisation de votre connexion. Nécessaires au bon fonctionnement du service.
                   </div>
                 </div>
                 <div style={{
@@ -132,7 +132,7 @@ export function CookieBanner() {
                     Cookies d'analyse
                   </div>
                   <div style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 1.55 }}>
-                    Mesure d'audience anonyme via PostHog (pages visitées, fonctionnalités utilisées). Aucune donnée vendue à des tiers.
+                    Mesure d'audience anonyme pour comprendre les fonctionnalités utilisées et améliorer le service. Aucune donnée vendue ni partagée avec des tiers.
                   </div>
                 </div>
                 {/* Toggle */}
