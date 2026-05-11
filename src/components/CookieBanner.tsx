@@ -41,13 +41,13 @@ export function CookieBanner() {
         fontSize: 13.5, lineHeight: 1.6, color: 'rgba(255,255,255,0.75)',
         margin: 0,
       }}>
-        Nous utilisons des cookies pour améliorer votre expérience et mesurer l'audience.{' '}
+        Nous utilisons des cookies pour améliorer votre expérience et à des fins de mesure d'audience. Pour en savoir plus, consultez notre{' '}
         <Link href="/confidentialite" target="_blank" style={{
-          color: 'rgba(255,255,255,0.5)', textDecoration: 'underline',
-          textUnderlineOffset: 3, fontSize: 12.5,
+          color: 'rgba(255,255,255,0.55)', textDecoration: 'underline',
+          textUnderlineOffset: 3,
         }}>
-          En savoir plus
-        </Link>
+          Politique relative aux cookies
+        </Link>.
       </p>
       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         <button onClick={declineAll} style={{
