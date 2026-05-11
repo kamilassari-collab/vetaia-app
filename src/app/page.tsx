@@ -429,8 +429,8 @@ const HTML = `
             <svg width="15" height="15" viewBox="0 0 18 18" fill="none"><ellipse cx="9" cy="12" rx="5" ry="3.5" stroke="#0B7A6A" stroke-width="1.4"/><circle cx="9" cy="6" r="2.2" stroke="#0B7A6A" stroke-width="1.4"/><circle cx="5.2" cy="4.2" r="1" fill="#0B7A6A" opacity=".4"/><circle cx="12.8" cy="4.2" r="1" fill="#0B7A6A" opacity=".4"/></svg>
           </div>
           <div>
-            <div class="patient-name">Rex · Golden Retriever</div>
-            <div class="patient-meta">4 ans · Mâle · 32 kg</div>
+            <div class="patient-name">Nala · Berger Malinois</div>
+            <div class="patient-meta">3 ans · Femelle · 26 kg</div>
           </div>
         </div>
         <div class="waveform">
@@ -558,16 +558,16 @@ const HTML = `
     </div>
     <div class="demo-wrap">
       <div class="demo-chips">
-        <button class="demo-chip-btn" onclick="launchDemo('Quel dosage d\'amoxicilline pour Rex, golden retriever de 32 kg avec une otite externe ?')">💊 Amoxicilline Rex 32 kg</button>
-        <button class="demo-chip-btn" onclick="launchDemo('Protocole anesthésique pour Rex, golden retriever de 4 ans en bonne santé ?')">😴 Anesthésie golden retriever</button>
-        <button class="demo-chip-btn" onclick="launchDemo('Rex, golden retriever 6 ans, boite depuis 3 semaines. Quels diagnostics différentiels pour dysplasie de la hanche ?')">🦴 Dysplasie hanche golden</button>
-        <button class="demo-chip-btn" onclick="launchDemo('Prévention et suivi leishmaniose chez Rex, golden retriever adulte vivant dans le sud de la France ?')">🔬 Leishmaniose golden</button>
+        <button class="demo-chip-btn" onclick="launchDemo('Dosage métronidazole pour un chat Persan stérilisé de 4 kg, diarrhée chronique depuis 10 jours ?')">💊 Métronidazole chat 4 kg</button>
+        <button class="demo-chip-btn" onclick="launchDemo('Protocole anesthésique pour laparotomie exploratrice chez un Labrador mâle de 28 kg, ASA II ?')">😴 Anesthésie laparotomie</button>
+        <button class="demo-chip-btn" onclick="launchDemo('Suspicion de diabète sucré chez un chat castré de 9 ans, polyurie-polydipsie depuis 3 semaines. Quels examens complémentaires ?')">🔬 Diabète félin</button>
+        <button class="demo-chip-btn" onclick="launchDemo('Traitement de première intention pour pyodermite superficielle canine récidivante, culture et antibiogramme en attente ?')">🦠 Pyodermite canine</button>
       </div>
       <div class="demo-window">
         <div class="demo-chat" id="demo-chat">
           <div class="demo-placeholder" id="demo-placeholder">
-            <span style="font-size:2.2em;line-height:1;">🐕</span>
-            <p>Rex attend votre question</p>
+            <span style="font-size:2.2em;line-height:1;">🩺</span>
+            <p>Posez votre question clinique</p>
           </div>
         </div>
         <div class="demo-input-row">

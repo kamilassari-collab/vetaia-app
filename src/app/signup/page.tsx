@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function SignupPage() {
   const router = useRouter();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', clinicName: '', password: '' });
+  const [acceptedCgu, setAcceptedCgu] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -76,6 +77,10 @@ export default function SignupPage() {
         .error { color: #DC2626; font-size: 13px; margin-bottom: 14px; padding: 10px 12px; background: #FEF2F2; border-radius: 8px; }
         .footer-note { margin-top: 20px; text-align: center; font-size: 12px; color: #B5AFA6; line-height: 1.6; }
         .footer-note a { color: #0B7A6A; text-decoration: none; }
+        .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+        .checkbox-row input[type=checkbox] { margin-top: 2px; accent-color: #0B7A6A; width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+        .checkbox-row label { font-size: 12.5px; color: #6B7280; line-height: 1.6; cursor: pointer; }
+        .checkbox-row label a { color: #0B7A6A; text-decoration: none; font-weight: 500; }
       `}</style>
       <div className="page">
         <div className="card">
@@ -109,8 +114,20 @@ export default function SignupPage() {
               <label>Mot de passe</label>
               <input required type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" minLength={8} />
             </div>
+            <div className="checkbox-row">
+              <input
+                type="checkbox"
+                id="cgu"
+                checked={acceptedCgu}
+                onChange={e => setAcceptedCgu(e.target.checked)}
+                required
+              />
+              <label htmlFor="cgu">
+                J'ai lu et j'accepte les <Link href="/cgu" target="_blank">Conditions Générales d'Utilisation</Link> et la <Link href="/confidentialite" target="_blank">Politique de Confidentialité</Link>. Je confirme être vétérinaire diplômé(e).
+              </label>
+            </div>
             {error && <div className="error">{error}</div>}
-            <button type="submit" className="btn" disabled={loading}>
+            <button type="submit" className="btn" disabled={loading || !acceptedCgu}>
               {loading ? 'Création en cours…' : 'Créer mon compte →'}
             </button>
           </form>

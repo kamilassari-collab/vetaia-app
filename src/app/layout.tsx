@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { PostHogProvider } from "./posthog-provider";
+import { CookieBanner } from "@/components/CookieBanner";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-manrope), sans-serif" }}>
         <PostHogProvider>
           {children}
+          <CookieBanner />
         </PostHogProvider>
         <Analytics />
       </body>
