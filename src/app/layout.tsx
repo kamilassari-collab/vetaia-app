@@ -12,8 +12,33 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "VetaIA — L'assistant IA des vétérinaires",
-  description: "Comptes-rendus automatiques, prise de rendez-vous téléphonique, gestion des dossiers. Entraîné sur de vraies données vétérinaires.",
+  title: {
+    default: "VetaIA — L'assistant IA des vétérinaires",
+    template: "%s | VetaIA",
+  },
+  description: "VetaIA est l'assistant IA conçu pour les vétérinaires : comptes-rendus SOAP automatiques, aide au diagnostic, protocoles, dosages et gestion des dossiers patients. Essayez gratuitement.",
+  keywords: ["assistant IA vétérinaire", "logiciel vétérinaire intelligence artificielle", "compte rendu consultation vétérinaire", "aide diagnostic vétérinaire", "VetaIA", "logiciel vétérinaire France"],
+  authors: [{ name: "VetaIA" }],
+  creator: "VetaIA",
+  metadataBase: new URL("https://www.vetaia.fr"),
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "https://www.vetaia.fr",
+    siteName: "VetaIA",
+    title: "VetaIA — L'assistant IA des vétérinaires",
+    description: "Comptes-rendus automatiques, aide au diagnostic et gestion des dossiers patients. L'IA conçue pour les vétérinaires français.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VetaIA — L'assistant IA des vétérinaires",
+    description: "Comptes-rendus automatiques, aide au diagnostic et gestion des dossiers patients.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   verification: {
     google: "rusil4AYXanKM7LUyBPMdHP5hSfoO1VZfxKNbWx6sWE",
   },
