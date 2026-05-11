@@ -14,10 +14,12 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { supabase } from '@/lib/supabase';
+import { posthog } from '@/app/posthog-provider';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Source { name: string; url: string; type: string; excerpt: string }
-interface Message { role: 'user' | 'assistant'; content: string; sources?: Source[]; mode?: string }
+interface ClarificationStep { question: string; options: string[]; field: string }
+interface Message { role: 'user' | 'assistant'; content: string; sources?: Source[]; mode?: string; clarification?: ClarificationStep; pendingQuery?: string; answered?: boolean }
 interface Folder { id: string; name: string; color: string; collapsed: boolean; createdAt: number }
 interface Conversation { id: string; title: string; folderId: string | null; messages: Message[]; createdAt: number }
 interface PatientBanner { name: string; species: string; breed?: string; weight_kg?: number }
@@ -154,6 +156,49 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
         <div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ children }) => <span>{children}</span> }}>{content}</ReactMarkdown></div>
       </div>
       {sources && sources.length > 0 && <SourcePills sources={sources} />}
+    </div>
+  );
+}
+
+// ─── ClarificationCard ───────────────────────────────────────────────────────
+function ClarificationCard({ step, onAnswer, disabled }: { step: ClarificationStep; onAnswer: (answer: string) => void; disabled: boolean }) {
+  const [showInput, setShowInput] = useState(false);
+  const [freeText, setFreeText] = useState('');
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+        <div style={{ width: 22, height: 22, borderRadius: 6, background: '#E8F5F0', border: '1px solid #BBE0D6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Logo mark height={11} /></div>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>VetaIA</span>
+      </div>
+      <div style={{ padding: '14px 18px', borderRadius: '4px 14px 14px 14px', background: 'white', border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', maxWidth: '100%' }}>
+        <p style={{ fontSize: 13.5, color: '#364152', lineHeight: 1.65, margin: '0 0 14px', fontWeight: 500 }}>{step.question}</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {step.options.map(opt => (
+            <button key={opt} onClick={() => { if (!disabled) onAnswer(opt); }} disabled={disabled}
+              style={{ padding: '7px 16px', borderRadius: 99, border: '1.5px solid #BBE0D6', background: '#F0FAF7', color: '#0B7A6A', fontSize: 13, fontWeight: 600, cursor: disabled ? 'default' : 'pointer', fontFamily: "'Manrope', sans-serif", transition: 'all 0.15s', opacity: disabled ? 0.5 : 1 }}>
+              {opt}
+            </button>
+          ))}
+          {!showInput && (
+            <button onClick={() => { if (!disabled) setShowInput(true); }} disabled={disabled}
+              style={{ padding: '7px 16px', borderRadius: 99, border: '1.5px solid #E2E8F0', background: 'white', color: '#94A3B8', fontSize: 13, fontWeight: 500, cursor: disabled ? 'default' : 'pointer', fontFamily: "'Manrope', sans-serif", transition: 'all 0.15s', opacity: disabled ? 0.5 : 1 }}>
+              Autre…
+            </button>
+          )}
+        </div>
+        {showInput && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <input autoFocus value={freeText} onChange={e => setFreeText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && freeText.trim()) { onAnswer(freeText.trim()); setFreeText(''); setShowInput(false); } }}
+              placeholder="Précisez…"
+              style={{ flex: 1, padding: '7px 12px', borderRadius: 9, border: '1.5px solid #BBE0D6', fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: 'none', color: '#364152' }} />
+            <button onClick={() => { if (freeText.trim()) { onAnswer(freeText.trim()); setFreeText(''); setShowInput(false); } }}
+              style={{ padding: '7px 16px', borderRadius: 9, background: '#0B7A6A', color: 'white', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'Manrope', sans-serif" }}>
+              OK
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -299,6 +344,44 @@ function useTimer(running: boolean) {
   return { fmt, reset };
 }
 
+// ─── Context gap detection ────────────────────────────────────────────────────
+function detectContextGaps(question: string, patient: PatientBanner | null, ctx: Record<string, string>): ClarificationStep | null {
+  const q = question.toLowerCase();
+
+  // Skip short / conversational inputs
+  if (q.trim().split(/\s+/).length < 4) return null;
+  if (/^(bonjour|salut|merci|ok|oui|non|d'accord|parfait|super|génial|exact|bien)/i.test(q.trim())) return null;
+
+  // Only intercept clinical/pharmacological questions
+  const clinicalRx = /posologi|dosage?|mg\s*\/?\s*kg|traitement|protocole|antibioti|amoxicillin|enroflox|marboflox|trimétho|antiparasit|vaccin|chirurgi|anesthési|fluide|soluté|perfusion|ains|méloxicam|carprofène|cortico|prednison|dexamétha|anti-inflamm|thérapeutique|médicament|prescription|ordonnance|prophylax|analgési|morphine|buprenorphine|fentanyl|tramadol|gabapentin|antibiogramme|résistance antibio/i;
+  if (!clinicalRx.test(q)) return null;
+
+  // Species detection
+  const speciesRx = /\b(chien|chat|lapin|rongeur|cochon.d.inde|furet|oiseau|perroquet|reptile|tortue|serpent|nac|félin|canin|cheval|porc|bovin|ovin|caprin|ruminant)\b/i;
+  const speciesKnown = patient?.species || ctx.species || speciesRx.test(q);
+
+  if (!speciesKnown) {
+    return { field: 'species', question: 'Pour quelle espèce ?', options: ['Chien', 'Chat', 'Lapin', 'Oiseau'] };
+  }
+
+  // Weight — only needed for explicit dosage questions
+  const isDosageQ = /posologi|dosage?|mg\s*\/?\s*kg|combien|quelle?\s+dose/i.test(q);
+  const weightRx = /\b\d+[\.,]?\d*\s*kg\b/i;
+  const weightKnown = patient?.weight_kg || ctx.weight || weightRx.test(q);
+
+  if (isDosageQ && !weightKnown) {
+    const sp = (patient?.species || ctx.species || q).toLowerCase();
+    const isCat = /chat|félin/.test(sp);
+    return {
+      field: 'weight',
+      question: 'Quel est le poids du patient ?',
+      options: isCat ? ['< 2 kg', '2–4 kg', '4–6 kg', '> 6 kg'] : ['< 5 kg', '5–15 kg', '15–30 kg', '> 30 kg'],
+    };
+  }
+
+  return null;
+}
+
 // ─── ChatInner ────────────────────────────────────────────────────────────────
 function ChatInner() {
   const router = useRouter();
@@ -335,6 +418,7 @@ function ChatInner() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const authTokenRef = useRef<string | null>(null);
+  const clarCtxRef = useRef<Record<string, string>>({});
 
   const getAuthHeader = (): Record<string, string> =>
     authTokenRef.current ? { 'Authorization': `Bearer ${authTokenRef.current}` } : {};
@@ -356,6 +440,7 @@ function ChatInner() {
       const fullName = [firstName, lastName].filter(Boolean).join(' ');
       const initials = ([(firstName[0] ?? ''), (lastName[0] ?? '')].join('').toUpperCase() || user.email?.[0]?.toUpperCase()) ?? '?';
       setPersona({ initials, name: fullName ? `Dr. ${fullName}` : (user.email ?? ''), clinic: meta.clinic_name ?? '' });
+      posthog.identify(user.id, { email: user.email, name: fullName || user.email, clinic: meta.clinic_name ?? '' });
       const savedConvos: Conversation[] = JSON.parse(localStorage.getItem('leash-conversations') || '[]');
       const savedFolders: Folder[] = JSON.parse(localStorage.getItem('leash-folders') || '[]');
       setFolders(savedFolders);
@@ -410,6 +495,7 @@ function ChatInner() {
     const id = genId();
     save([{ id, title: 'Nouvelle consultation', folderId: activeFolderId, messages: [], createdAt: Date.now() }, ...convos]);
     setCurrentId(id); setActiveTab('consultation'); setRecordingPhase('idle'); resetTimer(); setRecordingTranscript('');
+    posthog.capture('new_consultation_started');
   }
 
   function commitRename(id: string) {
@@ -440,10 +526,42 @@ function ChatInner() {
     try { await fetch('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify({ consultationId, role, content, mode }) }); } catch { /* non-critical */ }
   }
 
-  async function sendMessage(text: string) {
+  async function sendMessage(text: string, overrideCtx?: Record<string, string>) {
     if (!text.trim() || loading) return;
+    const isReport = text.startsWith('Génère un compte rendu SOAP');
+    posthog.capture(isReport ? 'report_generated' : 'message_sent', {
+      has_patient: !!patientBanner,
+      patient_species: patientBanner?.species ?? null,
+      active_tab: activeTab,
+    });
+
+    // Context gap interception — only when not already supplying ctx
+    if (!overrideCtx) {
+      const gap = detectContextGaps(text, patientBanner, clarCtxRef.current);
+      if (gap) {
+        setInput(''); if (textareaRef.current) textareaRef.current.style.height = '48px';
+        setActiveTab('chat');
+        const userMsg: Message = { role: 'user', content: text };
+        const clarMsg: Message = { role: 'assistant', content: '', mode: 'clarification', clarification: gap, pendingQuery: text };
+        setConvos(prev => {
+          const updated = prev.map(c => c.id !== currentId ? c : { ...c, messages: [...c.messages, userMsg, clarMsg], title: c.title === 'Nouvelle consultation' ? text.slice(0, 42) : c.title });
+          localStorage.setItem('leash-conversations', JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+
     setInput(''); if (textareaRef.current) textareaRef.current.style.height = '48px';
     setLoading(true); setActiveTab('chat');
+
+    // Enrich question with collected context
+    const ctx = overrideCtx ?? {};
+    let enrichedText = text;
+    if (Object.keys(ctx).length > 0) {
+      const parts = Object.entries(ctx).map(([k, v]) => `${k}: ${v}`).join(', ');
+      enrichedText = `${text}\n\n[Contexte: ${parts}]`;
+    }
 
     const userMsg: Message = { role: 'user', content: text };
     const withUser = convos.map(c => c.id !== currentId ? c : { ...c, messages: [...c.messages, userMsg], title: c.title === 'Nouvelle consultation' ? text.slice(0, 42) : c.title });
@@ -452,7 +570,7 @@ function ChatInner() {
     await saveMessageToDB('user', text);
 
     const fetchWithRetry = async (attempt = 1): Promise<Response> => {
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify({ question: text, patientId: patientId ?? undefined, consultationId: consultationId ?? undefined }) });
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify({ question: enrichedText, patientId: patientId ?? undefined, consultationId: consultationId ?? undefined }) });
       if (res.status >= 500 && attempt < 3) { await new Promise(r => setTimeout(r, 2000)); return fetchWithRetry(attempt + 1); }
       return res;
     };
@@ -480,6 +598,41 @@ function ChatInner() {
     } finally { setLoading(false); }
   }
 
+  function handleClarificationAnswer(answer: string, pendingQ: string, field: string) {
+    const newCtx = { ...clarCtxRef.current, [field]: answer };
+    clarCtxRef.current = newCtx;
+
+    // Mark this card as answered
+    setConvos(prev => {
+      const updated = prev.map(c => c.id !== currentId ? c : {
+        ...c,
+        messages: c.messages.map(m =>
+          m.mode === 'clarification' && m.pendingQuery === pendingQ && !m.answered
+            ? { ...m, answered: true, content: answer }
+            : m
+        ),
+      });
+      localStorage.setItem('leash-conversations', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Check for more gaps
+    const nextGap = detectContextGaps(pendingQ, patientBanner, newCtx);
+    if (nextGap) {
+      setConvos(prev => {
+        const updated = prev.map(c => c.id !== currentId ? c : {
+          ...c,
+          messages: [...c.messages, { role: 'assistant' as const, content: '', mode: 'clarification', clarification: nextGap, pendingQuery: pendingQ }],
+        });
+        localStorage.setItem('leash-conversations', JSON.stringify(updated));
+        return updated;
+      });
+    } else {
+      clarCtxRef.current = {};
+      sendMessage(pendingQ, newCtx);
+    }
+  }
+
   function handleKey(e: React.KeyboardEvent) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }
 
   async function startRecording() {
@@ -496,7 +649,7 @@ function ChatInner() {
           const fd = new FormData(); fd.append('audio', blob, 'recording.webm');
           const res = await fetch('/api/transcribe', { method: 'POST', headers: getAuthHeader(), body: fd });
           const data = await res.json();
-          if (data.text) { setRecordingTranscript(data.text); setRecordingPhase('idle'); return; }
+          if (data.text) { setRecordingTranscript(data.text); setRecordingPhase('idle'); posthog.capture('voice_transcription_completed', { has_patient: !!patientBanner }); return; }
         } catch { /* silent */ }
         setRecordingPhase('idle');
       };
@@ -1007,6 +1160,19 @@ function ChatInner() {
                             <div style={{ maxWidth: '62%', padding: '11px 16px', borderRadius: '16px 4px 16px 16px', background: '#0B7A6A', color: 'white', fontSize: 13.5, lineHeight: 1.65, fontWeight: 500, whiteSpace: 'pre-wrap', wordBreak: 'break-word', boxShadow: '0 2px 8px rgba(11,122,106,0.25)' }}>
                               {msg.content}
                             </div>
+                          ) : msg.mode === 'clarification' && msg.clarification ? (
+                            msg.answered ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 22, height: 22, borderRadius: 6, background: '#E8F5F0', border: '1px solid #BBE0D6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Logo mark height={11} /></div>
+                                <span style={{ fontSize: 12.5, color: '#94A3B8', fontStyle: 'italic' }}>{msg.clarification.question}</span>
+                                <span style={{ padding: '3px 12px', borderRadius: 99, background: '#0B7A6A', color: 'white', fontSize: 12.5, fontWeight: 600 }}>{msg.content}</span>
+                              </div>
+                            ) : (
+                              <div style={{ maxWidth: '78%' }}>
+                                <ClarificationCard step={msg.clarification} disabled={loading}
+                                  onAnswer={answer => handleClarificationAnswer(answer, msg.pendingQuery!, msg.clarification!.field)} />
+                              </div>
+                            )
                           ) : (
                             <div style={{ maxWidth: '78%' }}>
                               <AIMessage content={msg.content} sources={msg.sources}
