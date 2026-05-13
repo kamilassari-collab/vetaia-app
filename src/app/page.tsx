@@ -84,7 +84,7 @@ nav {
 .hero-blob-shape { clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%); background: linear-gradient(to top right, rgba(11,122,106,.55), rgba(13,200,170,.22)); position: relative; left: calc(50% - 30rem); aspect-ratio: 1155/678; width: 72.1875rem; max-width: none; transform: rotate(30deg); opacity: 0.44; }
 .hero-dots { position: absolute; inset: 0; pointer-events: none; z-index: 0; background-image: radial-gradient(circle, rgba(11,122,106,.13) 1.5px, transparent 1.5px); background-size: 28px 28px; mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, black 20%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 0%, black 20%, transparent 100%); }
 .hero { max-width: var(--max-w); margin: 0 auto; padding: 5.5em var(--pad-h) 3.5em; text-align: center; animation: rise .9s var(--ease) both; position: relative; z-index: 1; }
-.hero-badge { display:inline-flex; align-items:center; gap:.5em; font-size:.75em; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--brand); background:var(--brand-bg); padding:.35em 1em; border-radius:100em; margin-bottom:1.6em; border:1px solid color-mix(in srgb, var(--brand) 20%, transparent); }
+.hero-badge { display:inline-flex; align-items:center; gap:.5em; font-size:.75em; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--brand); background:var(--brand-bg); padding:.35em 1em; border-radius:100em; margin-bottom:1.6em; }
 .hero-dot { width:6px; height:6px; border-radius:50%; background:var(--brand); animation:pdot 2s ease-in-out infinite; flex-shrink:0; }
 .hero-h1 { font-family:'Newsreader',serif; font-size:5em; font-weight:400; line-height:1.03; letter-spacing:-.04em; color:var(--ink); margin-bottom:1rem; max-width:14em; margin-left:auto; margin-right:auto; }
 .hero-h1 em { font-style:italic; font-weight:300; color:var(--brand); }
@@ -135,7 +135,7 @@ nav {
 
 .section-inner { max-width:var(--max-w); margin:0 auto; padding:6em var(--pad-h); }
 .section-head { text-align:center; margin-bottom:4em; }
-.overline { display:inline-flex; align-items:center; gap:.4em; background:var(--brand-bg); color:var(--brand); font-size:.72em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:.32em .9em; border-radius:100em; margin-bottom:1em; border:1px solid color-mix(in srgb, var(--brand) 16%, transparent); }
+.overline { display:inline-flex; align-items:center; gap:.4em; background:var(--brand-bg); color:var(--brand); font-size:.72em; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:.32em .9em; border-radius:100em; margin-bottom:1em; }
 .sh2 { font-family:'Newsreader',serif; font-size:3em; font-weight:400; letter-spacing:-.035em; line-height:1.06; color:var(--ink); margin-bottom:.7em; }
 .sh2 em { font-style:italic; font-weight:300; color:var(--brand); }
 .ssub { font-size:1.05em; color:var(--ink-2); line-height:1.78; max-width:34em; margin:0 auto; }
@@ -198,47 +198,6 @@ nav {
 .demo-typing span:nth-child(2) { animation-delay: .2s; }
 .demo-typing span:nth-child(3) { animation-delay: .4s; }
 
-.feat-anim-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.feat-anim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25em; }
-.feat-anim-card { background: var(--warm); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 1.75em; display: flex; flex-direction: column; min-height: 270px; transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); overflow: hidden; }
-.feat-anim-card:hover { box-shadow: var(--sh-card-hover); transform: translateY(-2px); }
-.feat-anim-inner { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 110px; margin-bottom: 1.1em; }
-.feat-anim-eyebrow { font-size: .68em; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--brand); margin-bottom: .45em; }
-.feat-anim-title { font-family: 'Newsreader', serif; font-size: 1.25em; font-weight: 400; color: var(--ink); letter-spacing: -.025em; line-height: 1.15; margin-bottom: .4em; }
-.feat-anim-desc { font-size: .82em; color: var(--ink-2); line-height: 1.72; }
-.feat-demo-wave { display: flex; align-items: center; gap: 3px; }
-.feat-a-bar { width: 3.5px; border-radius: 3px; background: var(--brand); animation: wav 1.4s ease-in-out infinite; }
-.feat-demo-gen { display: flex; flex-direction: column; align-items: center; gap: 1em; width: 100%; max-width: 150px; }
-.feat-gen-circle { width: 58px; height: 58px; border-radius: 50%; background: var(--brand-bg); border: 2px solid color-mix(in srgb, var(--brand) 22%, transparent); display: flex; align-items: center; justify-content: center; position: relative; }
-.feat-gen-ring { position: absolute; inset: -5px; border-radius: 50%; border: 2.5px solid transparent; border-top-color: var(--brand); border-right-color: color-mix(in srgb, var(--brand) 35%, transparent); animation: spin 1.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.feat-gen-num { font-family: 'Newsreader', serif; font-size: 1.1em; font-weight: 300; color: var(--brand); }
-.feat-gen-bar { width: 100%; height: 3px; background: var(--border); border-radius: 100em; overflow: hidden; }
-.feat-gen-fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-lt)); border-radius: 100em; animation: gen-fill 2.8s ease-in-out infinite; }
-@keyframes gen-fill { 0% { width: 0% } 65%, 100% { width: 100% } }
-.feat-gen-tag { font-size: .64em; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); }
-.feat-demo-report { display: flex; flex-direction: column; gap: .55em; width: 100%; max-width: 204px; }
-.feat-report-row { display: flex; gap: .5em; align-items: center; opacity: 0; }
-.feat-report-row:nth-child(1) { animation: chip-loop 4.4s ease-in-out 0s infinite; }
-.feat-report-row:nth-child(2) { animation: chip-loop 4.4s ease-in-out 0.65s infinite; }
-.feat-report-row:nth-child(3) { animation: chip-loop 4.4s ease-in-out 1.3s infinite; }
-.feat-report-row:nth-child(4) { animation: chip-loop 4.4s ease-in-out 1.95s infinite; }
-@keyframes chip-loop { 0%, 2% { opacity: 0; transform: translateX(-7px); } 12%, 72% { opacity: 1; transform: translateX(0); } 82%, 100% { opacity: 0; transform: translateX(-7px); } }
-.feat-chip { font-size: .58em; font-weight: 700; padding: .18em .55em; border-radius: 6px; background: var(--brand-bg); color: var(--brand); border: 1px solid color-mix(in srgb, var(--brand) 16%, transparent); white-space: nowrap; flex-shrink: 0; }
-.feat-chip-line { font-size: .67em; color: var(--ink-2); line-height: 1.4; }
-
-.testi-section { background:var(--warm); border-top:1px solid var(--border); }
-.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1em; }
-.testi-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-l); padding:1.8em; transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); }
-.testi-card:hover { box-shadow:var(--sh-card-hover); transform:translateY(-2px); outline: 1px solid color-mix(in srgb, var(--brand) 14%, transparent); }
-.testi-stars { font-size:.8em; margin-bottom:1em; letter-spacing:2px; color:#F59E0B; }
-.testi-quote { font-size:.875em; color:var(--ink-2); line-height:1.82; margin-bottom:1.4em; }
-.testi-quote strong { color:var(--ink); font-weight:500; }
-.testi-author { display:flex; align-items:center; gap:.65em; }
-.testi-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-family:'DM Sans',sans-serif; font-weight:700; color:rgba(255,255,255,.9); flex-shrink:0; }
-.testi-name { font-size:.82em; font-weight:600; color:var(--ink); }
-.testi-role { font-size:.72em; color:var(--ink-3); margin-top:1px; }
-.testi-quote-deco { font-family: 'Newsreader', serif; font-size: 3.2em; line-height: .75; color: var(--brand-bg); display: block; margin-bottom: .2em; letter-spacing: -.04em; user-select: none; }
 
 .faq-section { background:var(--surface); border-top:1px solid var(--border); }
 .faq-inner { max-width:50em; margin:0 auto; }
@@ -324,9 +283,7 @@ footer { background:var(--ink); border-top:1px solid rgba(255,255,255,.05); }
   .step-cards { grid-template-columns:1fr; }
   .step-card { text-align:left; padding:1.75em 1.5em; }
   .step-deco { margin:0 0 1.25em; }
-  .feat-anim-grid { grid-template-columns: 1fr; }
   .sh2 { font-size:2.25em; }
-  .testi-grid { grid-template-columns:1fr; }
   .cta-box { padding:4em 1.5rem; border-radius:var(--r-xl); }
   .cta-h2 { font-size:2.5em; }
   .cta-actions { flex-direction:column; align-items:center; }
@@ -363,8 +320,6 @@ const HTML = `
     </a>
     <div class="nav-links" id="nav-links">
       <a href="#fonctionnalites" class="nav-link">Fonctionnalités</a>
-      <a href="#comment-ca-marche" class="nav-link">Comment ça marche</a>
-      <a href="#temoignages" class="nav-link">Témoignages</a>
       <a href="/login" class="nav-link nav-link-mob">Connexion</a>
     </div>
     <div class="nav-actions">
@@ -478,7 +433,7 @@ const HTML = `
         <div class="feat-duo-text">
           <div class="feat-duo-eyebrow">Dictée &amp; Transcription</div>
           <div class="feat-duo-title">Fini la rédaction.<br><em>Pour toujours.</em></div>
-          <p class="feat-duo-desc">Vous parlez, VetaIA rédige. Le compte-rendu structuré est prêt en 30 secondes : symptômes, examen, diagnostic, traitement, sans que vous ayez touché au clavier.</p>
+          <p class="feat-duo-desc">Vous parlez, VetaIA rédige. Le compte-rendu structuré est prêt en 30 secondes : symptômes, examen, diagnostic, traitement, sans que vous ayez touché au clavier. Exportable sur votre logiciel véto.</p>
         </div>
         <div class="feat-duo-ui">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden;box-shadow:var(--sh-card);">
@@ -552,9 +507,9 @@ const HTML = `
 <section class="demo-section" id="demo">
   <div class="section-inner">
     <div class="section-head">
-      <div class="overline"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><circle cx="3.5" cy="3.5" r="3" fill="#2DD4C0"/></svg>Essayez maintenant</div>
-      <h2 class="sh2">Posez une vraie <em>question vétérinaire.</em></h2>
-      <p class="ssub">Obtenez une réponse clinique en quelques secondes. Sans inscription.</p>
+      <div class="overline">Assistant clinique IA</div>
+      <h2 class="sh2">La bonne réponse, <em>en 5 secondes.</em></h2>
+      <p class="ssub">Dosages par espèce, interactions médicamenteuses, protocoles. Posez votre question en langage naturel — obtenez une réponse sourcée.</p>
     </div>
     <div class="demo-wrap">
       <div class="demo-chips">
@@ -575,44 +530,12 @@ const HTML = `
           <button class="demo-send-btn" id="demo-send" onclick="sendDemo()">Envoyer<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 5.5h9M6.5 1.5l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
-      <p class="demo-note">Données non enregistrées · Réservé aux vétérinaires diplômés</p>
+      <p class="demo-note">Réponses sourcées · 2 questions offertes · Réservé aux vétérinaires</p>
     </div>
   </div>
 </section>
 
-<section class="feat-anim-section">
-  <div class="section-inner">
-    <div class="feat-anim-grid">
-      <div class="feat-anim-card">
-        <div class="feat-anim-inner"><div class="feat-demo-wave"><div class="feat-a-bar" style="height:8px;animation-delay:.00s;opacity:.2;"></div><div class="feat-a-bar" style="height:20px;animation-delay:.10s;opacity:.34;"></div><div class="feat-a-bar" style="height:36px;animation-delay:.20s;opacity:.50;"></div><div class="feat-a-bar" style="height:52px;animation-delay:.30s;opacity:.66;"></div><div class="feat-a-bar" style="height:64px;animation-delay:.40s;opacity:.80;"></div><div class="feat-a-bar" style="height:70px;animation-delay:.50s;opacity:.92;"></div><div class="feat-a-bar" style="height:72px;animation-delay:.55s;opacity:1;"></div><div class="feat-a-bar" style="height:70px;animation-delay:.60s;opacity:.92;"></div><div class="feat-a-bar" style="height:60px;animation-delay:.70s;opacity:.78;"></div><div class="feat-a-bar" style="height:66px;animation-delay:.80s;opacity:.86;"></div><div class="feat-a-bar" style="height:72px;animation-delay:.90s;opacity:1;"></div><div class="feat-a-bar" style="height:50px;animation-delay:1.0s;opacity:.64;"></div><div class="feat-a-bar" style="height:30px;animation-delay:.85s;opacity:.44;"></div><div class="feat-a-bar" style="height:14px;animation-delay:.75s;opacity:.26;"></div></div></div>
-        <div><div class="feat-anim-eyebrow">Dictée &amp; Transcription</div><div class="feat-anim-title">Parlez.<br>VetaIA transcrit.</div><p class="feat-anim-desc">Chaque mot retranscrit en temps réel, même avec le patient dans la salle.</p></div>
-      </div>
-      <div class="feat-anim-card">
-        <div class="feat-anim-inner"><div class="feat-demo-gen"><div class="feat-gen-circle"><div class="feat-gen-ring"></div><span class="feat-gen-num">30s</span></div><div class="feat-gen-bar"><div class="feat-gen-fill"></div></div><div class="feat-gen-tag">Rapport en cours…</div></div></div>
-        <div><div class="feat-anim-eyebrow">Génération IA</div><div class="feat-anim-title">Un clic.<br>Un rapport complet.</div><p class="feat-anim-desc">Structuré en 30 secondes : symptômes, examen, diagnostic, traitement. Prêt à signer sans toucher au clavier.</p></div>
-      </div>
-      <div class="feat-anim-card">
-        <div class="feat-anim-inner"><div class="feat-demo-report"><div class="feat-report-row"><span class="feat-chip">Symptômes</span><span class="feat-chip-line">Boiterie droite · 3 jours</span></div><div class="feat-report-row"><span class="feat-chip">Examen</span><span class="feat-chip-line">32 kg · T° 38,6°C</span></div><div class="feat-report-row"><span class="feat-chip">Diagnostic</span><span class="feat-chip-line">Suspicion rupture LCC</span></div><div class="feat-report-row"><span class="feat-chip">Traitement</span><span class="feat-chip-line">Méloxicam · Radio · Repos</span></div></div></div>
-        <div><div class="feat-anim-eyebrow">Rapport Structuré</div><div class="feat-anim-title">Prêt à signer.<br>Prêt à copier.</div><p class="feat-anim-desc">Chaque section est éditable. Copiez en un clic dans Vetup, VetManager ou votre logiciel de gestion.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section class="testi-section" id="temoignages">
-  <div class="section-inner">
-    <div class="section-head">
-      <div class="overline"><svg width="7" height="7" viewBox="0 0 7 7" fill="none"><circle cx="3.5" cy="3.5" r="3" fill="#2DD4C0"/></svg>Témoignages</div>
-      <h2 class="sh2">Ils ont arrêté de rédiger <em>leurs rapports eux-mêmes.</em></h2>
-      <p class="ssub">Ils font partie des premières cliniques à tester VetaIA pendant la bêta.</p>
-    </div>
-    <div class="testi-grid">
-      <div class="testi-card"><span class="testi-quote-deco">"</span><div class="testi-stars">★★★★★</div><p class="testi-quote">"Je dicte pendant la consultation et le rapport est prêt avant que le propriétaire ait remis sa laisse. <strong>J'ai récupéré presque deux heures par jour.</strong>"</p><div class="testi-author"><div class="testi-avatar" style="background:linear-gradient(135deg,#0B4A40,#0B7A6A);">MD</div><div><div class="testi-name">Dr. Marie Dubois</div><div class="testi-role">Vétérinaire généraliste · Lyon</div></div></div></div>
-      <div class="testi-card"><span class="testi-quote-deco">"</span><div class="testi-stars">★★★★★</div><p class="testi-quote">"En chirurgie on perd beaucoup de temps à dicter les comptes-rendus post-op. Avec VetaIA, <strong>je parle et le rapport est structuré en trente secondes.</strong> Bluffant."</p><div class="testi-author"><div class="testi-avatar" style="background:linear-gradient(135deg,#1A1A2E,#16213E);">AM</div><div><div class="testi-name">Dr. Antoine Mercier</div><div class="testi-role">Chirurgien vétérinaire · Paris</div></div></div></div>
-      <div class="testi-card"><span class="testi-quote-deco">"</span><div class="testi-stars">★★★★★</div><p class="testi-quote">"Les dosages, les interactions médicamenteuses. Je pose la question, <strong>j'ai la réponse en quelques secondes.</strong> C'est le genre d'outil dont on ne réalise pas qu'on avait besoin."</p><div class="testi-author"><div class="testi-avatar" style="background:linear-gradient(135deg,#2D1B4E,#1A0F30);">SL</div><div><div class="testi-name">Dr. Sophie Laurent</div><div class="testi-role">Vétérinaire généraliste · Bordeaux</div></div></div></div>
-    </div>
-  </div>
-</section>
 
 <section class="faq-section">
   <div class="section-inner">
@@ -656,7 +579,6 @@ const HTML = `
       <div class="flinks">
         <a href="#fonctionnalites" class="flink">Transcription &amp; rapports</a>
         <a href="#fonctionnalites" class="flink">Assistant clinique</a>
-        <a href="#comment-ca-marche" class="flink">Comment ça marche</a>
         <a href="https://calendly.com/kamilassari/30min" class="flink" target="_blank">Réserver une démo</a>
       </div>
     </div>
