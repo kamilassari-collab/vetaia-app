@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, ArrowRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -73,8 +72,17 @@ function SourcePills({ sources }: { sources: Source[] }) {
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
+function getOrCreateSessionId(): string {
+  const key = 'demo-session-id';
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem(key, id);
+  }
+  return id;
+}
+
 export default function DemoPage() {
-  const router = useRouter();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,10 +91,13 @@ export default function DemoPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isLimited = count >= DEMO_LIMIT;
 
-  // Pick up prefill from landing page widget
+  // Pick up prefill from landing page widget (sessionStorage same-origin, ?q= param cross-origin)
   useEffect(() => {
-    const q = sessionStorage.getItem('demo-prefill');
-    if (q) { sessionStorage.removeItem('demo-prefill'); send(q); }
+    const params = new URLSearchParams(window.location.search);
+    const fromParam = params.get('q');
+    if (fromParam) { window.history.replaceState({}, '', '/demo'); send(fromParam); return; }
+    const fromStorage = sessionStorage.getItem('demo-prefill');
+    if (fromStorage) { sessionStorage.removeItem('demo-prefill'); send(fromStorage); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -105,7 +116,7 @@ export default function DemoPage() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Session-Id': getOrCreateSessionId() },
         body: JSON.stringify({ question: q }),
       });
 

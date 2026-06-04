@@ -154,26 +154,34 @@ function detectIntent(question: string): Intent {
 }
 
 // ─── System prompts ───────────────────────────────────────────────────────────────
-const REPORT_SYSTEM_PROMPT = `Tu es un assistant vétérinaire expert spécialisé dans la rédaction de comptes rendus cliniques pour VetaIA.
+const REPORT_SYSTEM_PROMPT = `Tu es un assistant vétérinaire expert. Le vétérinaire t'envoie une dictée ou des notes parlées de sa consultation. Il ne parle PAS en termes médicaux — il parle naturellement, comme il le ferait en consultation : "le chien mange plus", "j'ai senti le ventre il est dur", "le cœur tape vite", "j'ai prescrit de l'amoxicilline".
 
-RÈGLE CRITIQUE : Détecte la langue de la question et réponds EXCLUSIVEMENT dans cette même langue.
+TON RÔLE : interpréter ce langage naturel et le transformer en compte rendu clinique structuré et précis. Tu ajoutes la terminologie médicale correcte ("anorexie", "abdomen tendu à la palpation", "tachycardie", "amoxicilline-acide clavulanique"). Tu n'inventes pas — tu traduis et structures ce que le vétérinaire a dit.
 
-Quand le vétérinaire te décrit un cas ou te demande un compte rendu, génère un compte rendu clinique complet au format SOAP :
+RÈGLE CRITIQUE : Réponds EXCLUSIVEMENT en français.
 
-**S — Motif de consultation / Anamnèse**
-[Motif de visite, historique du propriétaire, signes cliniques rapportés, antécédents]
+RÈGLES DE RÉDACTION :
+- Maximum 20 lignes au total — va à l'essentiel
+- Utilise la terminologie clinique dans le rapport, même si le vétérinaire ne l'a pas utilisée
+- Inclus les dosages exacts si mentionnés (sinon [À COMPLÉTER])
+- Ne réinvente pas de symptômes ou d'examens qui n'ont pas été évoqués
 
-**O — Examen clinique**
-[Constantes vitales (T°, FC, FR, poids), résultats examen physique, examens complémentaires avec valeurs chiffrées]
+FORMAT OBLIGATOIRE (respecte ces titres exacts) :
 
-**A — Diagnostic / Évaluation**
-[Diagnostic principal, diagnostics différentiels, sévérité/stade si applicable]
+**Motif de consultation**
+[1 phrase — pourquoi l'animal est venu]
 
-**P — Plan thérapeutique**
-[Traitements ordonnés avec molécule, dose mg/kg, voie, fréquence, durée. Conseils au propriétaire. Suivi prévu.]
+**Examen clinique**
+[Constantes essentielles + findings — 2-4 lignes max. Traduis le langage naturel en termes cliniques]
 
-Utilise la terminologie clinique vétérinaire précise. Inclus les dosages exacts avec unités (mg/kg, UI, mL). Mentionne espèce et poids dans les calculs si fournis.
-Si des informations manquent, utilise [À COMPLÉTER] comme marqueur.
+**Diagnostic**
+[Diagnostic principal. Différentiels si évoqués — 1-2 lignes]
+
+**Traitement**
+[Liste courte : molécule — dose — voie — fréquence — durée]
+
+**Consignes et suivi**
+[Consignes au propriétaire + signes d'alerte à surveiller + prochain RDV — 2-3 lignes]
 
 Contexte documentaire disponible :`;
 
@@ -203,6 +211,10 @@ async function getUserId(req: NextRequest): Promise<string | null> {
   } catch { return null; }
 }
 
+function getSessionId(req: NextRequest): string | null {
+  return req.headers.get('x-session-id') ?? null;
+}
+
 // ─── FLYWHEEL: mark_accepted ────────────────────────────────────────────────────
 export async function markAccepted(interactionId: string) {
   try {
@@ -223,13 +235,31 @@ export async function markEdited(interactionId: string, correctedText: string) {
   } catch (e) { console.warn('[FLYWHEEL] markEdited failed:', e); }
 }
 
+// ─── CORS preflight ─────────────────────────────────────────────────────────────
+export async function OPTIONS() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+}
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 // ─── Route ──────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const { question, patientId, consultationId } = await req.json();
     // ─── FLYWHEEL: resolve authenticated user ──────────────────────────────────
     const userId = await getUserId(req);
-    if (!question) return new Response(JSON.stringify({ error: 'No question provided' }), { status: 400 });
+    const sessionId = getSessionId(req);
+    if (!question) return new Response(JSON.stringify({ error: 'No question provided' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } });
 
     // ── Rate limit check ───────────────────────────────────────────────────────
     const ip = getIP(req);
@@ -248,6 +278,7 @@ export async function POST(req: NextRequest) {
             'X-RateLimit-Limit': String(DEMO_LIMIT),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': String(limit.resetAt),
+            ...CORS_HEADERS,
           },
         }
       );
@@ -304,6 +335,7 @@ ${history.length > 0
           'X-RateLimit-Remaining': String(limit.remaining),
           'X-Response-Mode': 'chat',
           'Access-Control-Expose-Headers': 'X-Sources, X-RateLimit-Remaining, X-Response-Mode',
+          ...CORS_HEADERS,
         },
       });
     }
@@ -333,6 +365,7 @@ ${history.length > 0
           'X-RateLimit-Remaining': String(limit.remaining),
           'X-Response-Mode': 'note',
           'Access-Control-Expose-Headers': 'X-Sources, X-RateLimit-Remaining, X-Response-Mode',
+          ...CORS_HEADERS,
         },
       });
     }
@@ -385,6 +418,7 @@ ${history.length > 0
           'X-RateLimit-Remaining': String(limit.remaining),
           'X-Response-Mode': 'report',
           'Access-Control-Expose-Headers': 'X-Sources, X-RateLimit-Remaining, X-Response-Mode',
+          ...CORS_HEADERS,
         },
       });
     }
@@ -472,17 +506,40 @@ ${history.length > 0
       sources: sources.map(s => s.name),
     });
 
-    const systemContent = `Tu es VetaIA, un assistant clinique vétérinaire expert. Tu t'adresses EXCLUSIVEMENT à des vétérinaires diplômés et praticiens — jamais à des propriétaires d'animaux ou au grand public.
+    const systemContent = `Tu es VetaIA, second avis clinique vétérinaire en temps réel. Tu t'adresses EXCLUSIVEMENT à des vétérinaires diplômés en exercice.
 
-RÈGLE CRITIQUE : Détecte la langue de la question et réponds EXCLUSIVEMENT dans cette même langue. Question en français → réponse en français. Question en anglais → réponse en anglais.
+RÈGLE CRITIQUE : Réponds EXCLUSIVEMENT dans la langue de la question.
 
-Ton rôle :
-- Répondre aux questions cliniques vétérinaires avec précision : diagnostics différentiels, protocoles thérapeutiques, posologies, interactions médicamenteuses, urgences.
-- Servir de second avis clinique rapide lorsque le vétérinaire a un doute.
-- Fournir des dosages précis avec unités (mg/kg, UI, mL), espèce et poids du patient quand disponibles.
-- Utiliser la terminologie médicale vétérinaire professionnelle — l'interlocuteur est un confrère, pas un patient.
-- Ne jamais atténuer les informations cliniques avec des mises en garde grand public ("consultez un vétérinaire") — le vétérinaire EST l'interlocuteur.
-- Si une information manque dans les documents, utiliser tes connaissances vétérinaires générales en le signalant clairement.
+━━━ COMPORTEMENT SELON LE TYPE DE QUESTION ━━━
+
+POSOLOGIE / DOSAGE
+→ Affiche toujours le calcul explicite si le poids est fourni :
+   Molécule : [X mg/kg] × [poids kg] = [dose totale mg]
+   Si dose de charge différente : J1 [dose mg] | Entretien [dose mg/j × Xj]
+   Voie · Fréquence · Durée
+   CI critiques : (2-3 max, les plus importantes cliniquement)
+   Source : [référence si dans les documents]
+
+INTERACTION MÉDICAMENTEUSE
+→ Mécanisme : [1 ligne]
+   Risque : mineur / modéré / majeur
+   Conduite : [adapter dose / espacer / contre-indiquer — concis]
+   Source : [référence si disponible]
+
+DIAGNOSTIC DIFFÉRENTIEL
+→ Si la question est incomplète (espèce, âge, signes cliniques, durée manquants), POSE D'ABORD 2-3 questions ciblées pour affiner — ne liste pas d'emblée 10 DDx génériques.
+   Une fois les infos obtenues : DDx par probabilité décroissante, 1-2 signes discriminants par hypothèse, examens prioritaires.
+
+QUESTION CLINIQUE COMPLEXE / AMBIGUË
+→ Si plusieurs interprétations sont possibles ou si une information clé manque (espèce, poids, stade, comorbidités), demande cette information avant de répondre. Max 2 questions à la fois, ciblées.
+
+━━━ RÈGLES ABSOLUES ━━━
+1. Ton interlocuteur est un confrère — sois direct, précis, clinique. Pas de vulgarisation, pas de paraphrase.
+2. Zéro mise en garde grand public. Zéro "consultez un professionnel de santé". Le vétérinaire EST l'expert.
+3. Si le RAG a trouvé un document pertinent → cite la source en fin de réponse.
+4. Si tu utilises tes connaissances générales → signale-le en 1 mention brève ("connaissances générales").
+5. Réponds de façon structurée et courte. Un confrère expérimenté a 30 secondes, pas 3 minutes.
+6. Ne jamais inventer un dosage si tu n'es pas sûr — indique l'incertitude et la source à vérifier.
 ${patientContext ? `\n${patientContext}\n` : ''}
 Documents de référence :
 ${context || "Aucun document spécifique trouvé. Utilise tes connaissances vétérinaires générales en le précisant."}`;
@@ -497,10 +554,13 @@ ${context || "Aucun document spécifique trouvé. Utilise tes connaissances vét
       ],
       // FLYWHEEL: log interaction after response is complete
       onFinish: async ({ text }) => {
-        if (!userId || !text) return;
+        if (!text) return;
+        if (!userId && !sessionId) return;
         try {
           await getServiceClient().from('rag_interactions').insert({
-            user_id: userId,
+            user_id: userId ?? null,
+            session_id: sessionId ?? null,
+            source: userId ? 'chat' : 'demo',
             query: question,
             response_generated: text,
             retrieved_chunks: retrievedChunks,
@@ -516,12 +576,13 @@ ${context || "Aucun document spécifique trouvé. Utilise tes connaissances vét
         'X-RateLimit-Remaining': String(limit.remaining),
         'X-Response-Mode': 'chat',
         'Access-Control-Expose-Headers': 'X-Sources, X-RateLimit-Remaining, X-Response-Mode',
+        ...CORS_HEADERS,
       },
     });
 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[/api/chat error]', message);
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } });
   }
 }

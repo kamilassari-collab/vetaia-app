@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       file: audio,
       model: 'whisper-1',
       language: 'fr',
+      prompt: 'Vétérinaire qui parle de sa consultation. Il parle naturellement et parfois vite. Il peut dire : chien, chat, lapin, cheval, cochon d\'inde, furet. Il peut mentionner : propriétaire, madame, monsieur. Il peut décrire des symptômes : mange plus, boit beaucoup, a vomi, diarrhée, boite, se gratte, tousse, respire mal, ventre gonflé, a de la fièvre, perd du poids. Il peut citer des médicaments : amoxicilline, métronidazole, prednisolone, ibuprofène, doxycycline, meloxicam, furosémide. Il peut mentionner des examens : prise de sang, radio, écho, NFS, biochimie, tension, température, poids.',
     });
 
     return Response.json({ text: transcription.text });

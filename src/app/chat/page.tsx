@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -100,7 +101,7 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
           <div style={{ width: 22, height: 22, borderRadius: 6, background: '#E8F5F0', border: '1px solid #BBE0D6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Logo mark height={11} /></div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>Compte-rendu SOAP</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A' }}>Compte-rendu de consultation</span>
         </div>
         <div style={{ borderRadius: '4px 14px 14px 14px', background: 'white', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           <div style={{ padding: '16px 20px' }}><div className="ai-prose"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ children }) => <span>{children}</span> }}>{content}</ReactMarkdown></div></div>
@@ -118,7 +119,7 @@ function AIMessage({ content, sources, isStreaming, mode }: { content: string; s
                   .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
                   .replace(/\n\n/g, '</p><p>')
                   .replace(/\n/g, '<br/>');
-                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Compte-rendu SOAP</title><style>
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Compte-rendu de consultation</title><style>
                   body{font-family:'Helvetica Neue',Arial,sans-serif;max-width:700px;margin:40px auto;padding:0 32px;color:#111;font-size:14px;line-height:1.7}
                   h1,h2,h3{color:#0B7A6A;margin-top:24px;margin-bottom:6px}
                   h2{font-size:15px;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
@@ -256,9 +257,11 @@ function ConvoItem({ c, currentId, folders, editingTitle, titleInput, indent = f
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}>
             <Pencil size={11} />
           </button>
-          <button onClick={() => setShowMenu(v => !v)}
-            style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: showMenu ? '#EDF2F7' : 'none', border: 'none', cursor: 'pointer', borderRadius: 4, color: '#94A3B8' }}>
-            <MoreHorizontal size={11} />
+          <button onClick={() => setShowMenu(v => !v)} title="Déplacer dans un dossier"
+            style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: showMenu ? '#EDF7F4' : 'none', border: 'none', cursor: 'pointer', borderRadius: 4, color: showMenu ? '#0B7A6A' : '#94A3B8', transition: 'color 0.12s' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#0B7A6A'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = showMenu ? '#0B7A6A' : '#94A3B8'}>
+            <FolderOpen size={11} />
           </button>
           <button onClick={e => { e.stopPropagation(); onDelete(c.id); }}
             style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', borderRadius: 4, color: '#94A3B8' }}
@@ -271,19 +274,23 @@ function ConvoItem({ c, currentId, folders, editingTitle, titleInput, indent = f
 
       {showMenu && (
         <div ref={menuRef} onClick={e => e.stopPropagation()}
-          style={{ position: 'absolute', top: '100%', right: 0, zIndex: 200, marginTop: 4, background: 'white', border: '1px solid #E2E8F0', borderRadius: 10, padding: 4, minWidth: 176, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
-          <div style={{ padding: '4px 8px 5px', fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#94A3B8' }}>Déplacer vers</div>
+          style={{ position: 'absolute', top: '100%', right: 0, zIndex: 200, marginTop: 4, background: 'white', border: '1px solid #E2E8F0', borderRadius: 12, padding: 4, minWidth: 192, boxShadow: '0 8px 28px rgba(0,0,0,0.12)' }}>
+          <div style={{ padding: '6px 10px 5px', fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <FolderOpen size={10} /> Dossier patient
+          </div>
           <button onClick={() => { onMoveToFolder(c.id, null); setShowMenu(false); }}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 6, border: 'none', cursor: 'pointer', background: c.folderId === null ? '#EDF7F4' : 'transparent', color: c.folderId === null ? '#0B7A6A' : '#364152', fontSize: 12.5, fontFamily: 'inherit', textAlign: 'left' }}>
-            Sans dossier {c.folderId === null && <span style={{ marginLeft: 'auto', fontSize: 10 }}>✓</span>}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 7, border: 'none', cursor: 'pointer', background: c.folderId === null ? '#EDF7F4' : 'transparent', color: c.folderId === null ? '#0B7A6A' : '#486081', fontSize: 12.5, fontFamily: 'inherit', textAlign: 'left' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#E2E8F0', flexShrink: 0 }} />
+            <span style={{ flex: 1 }}>Sans dossier</span>
+            {c.folderId === null && <span style={{ color: '#0B7A6A', fontSize: 11 }}>✓</span>}
           </button>
           {folders.length > 0 && <div style={{ height: 1, background: '#F1F5F9', margin: '3px 0' }} />}
           {folders.map(f => (
             <button key={f.id} onClick={() => { onMoveToFolder(c.id, f.id); setShowMenu(false); }}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 6, border: 'none', cursor: 'pointer', background: c.folderId === f.id ? '#EDF7F4' : 'transparent', color: c.folderId === f.id ? '#0B7A6A' : '#364152', fontSize: 12.5, fontFamily: 'inherit', textAlign: 'left' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: f.color, flexShrink: 0 }} />
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px', borderRadius: 7, border: 'none', cursor: 'pointer', background: c.folderId === f.id ? '#EDF7F4' : 'transparent', color: c.folderId === f.id ? '#0B7A6A' : '#486081', fontSize: 12.5, fontFamily: 'inherit', textAlign: 'left' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: f.color, flexShrink: 0 }} />
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
-              {c.folderId === f.id && <span style={{ color: '#0B7A6A', fontSize: 10 }}>✓</span>}
+              {c.folderId === f.id && <span style={{ color: '#0B7A6A', fontSize: 11 }}>✓</span>}
             </button>
           ))}
         </div>
@@ -382,6 +389,102 @@ function detectContextGaps(question: string, patient: PatientBanner | null, ctx:
   return null;
 }
 
+// ─── Spotlight tutorial ───────────────────────────────────────────────────────
+const SPOTLIGHT_STEPS = [
+  {
+    id: 'mic-button',
+    badge: '1 / 3',
+    title: 'Dictez votre consultation',
+    message: 'Appuyez sur ce bouton pendant ou juste après l\'examen. Parlez naturellement — VetaIA transcrit et génère le compte-rendu en 30 secondes.',
+    cta: 'Cliquez sur le micro pour continuer',
+    position: 'right' as const,
+  },
+  {
+    id: 'tab-questions',
+    badge: '2 / 3',
+    title: 'Posez une question clinique',
+    message: 'Dosage, diagnostic différentiel, protocole anesthésique — posez votre question ici. VetaIA répond avec les sources en quelques secondes.',
+    cta: 'Cliquez sur l\'onglet pour continuer',
+    position: 'bottom' as const,
+  },
+  {
+    id: 'chip-example',
+    badge: '3 / 3',
+    title: 'Essayez avec cet exemple',
+    message: 'Cliquez sur cette question pour voir VetaIA répondre en temps réel, avec ses sources.',
+    cta: 'Cliquez pour voir la réponse',
+    position: 'top' as const,
+  },
+];
+
+function TutorialSpotlight({ step, onNext, onSkip }: { step: number; onNext: () => void; onSkip: () => void }) {
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const current = SPOTLIGHT_STEPS[step];
+
+  useEffect(() => {
+    const update = () => {
+      const el = document.querySelector(`[data-tutorial="${current.id}"]`);
+      if (el) setTargetRect(el.getBoundingClientRect());
+    };
+    update();
+    const t = setTimeout(update, 80);
+    window.addEventListener('resize', update);
+    return () => { clearTimeout(t); window.removeEventListener('resize', update); };
+  }, [step, current.id]);
+
+  const handleClick = () => {
+    const el = document.querySelector(`[data-tutorial="${current.id}"]`) as HTMLElement | null;
+    if (el) el.click();
+    onNext();
+  };
+
+  if (!targetRect || typeof window === 'undefined') return null;
+
+  const pad = 10;
+  const sTop = targetRect.top - pad;
+  const sLeft = targetRect.left - pad;
+  const sW = targetRect.width + pad * 2;
+  const sH = targetRect.height + pad * 2;
+
+  const TW = 290;
+  let tTop: number, tLeft: number;
+  if (current.position === 'right') {
+    tTop = targetRect.top + targetRect.height / 2 - 90;
+    tLeft = targetRect.right + 18;
+  } else if (current.position === 'bottom') {
+    tTop = targetRect.bottom + 14;
+    tLeft = targetRect.left + targetRect.width / 2 - TW / 2;
+  } else {
+    tTop = targetRect.top - 190;
+    tLeft = targetRect.left + targetRect.width / 2 - TW / 2;
+  }
+  tLeft = Math.max(12, Math.min(tLeft, window.innerWidth - TW - 12));
+  tTop = Math.max(12, tTop);
+
+  return createPortal(
+    <>
+      <style>{`@keyframes tutGlow{0%,100%{box-shadow:0 0 0 9999px rgba(15,23,32,0.72),0 0 0 2px rgba(11,122,106,0.5)}50%{box-shadow:0 0 0 9999px rgba(15,23,32,0.72),0 0 0 3px rgba(11,122,106,1),0 0 20px rgba(11,122,106,0.35)}}`}</style>
+      {/* Spotlight frame */}
+      <div style={{ position:'fixed', zIndex:9991, pointerEvents:'none', top:sTop, left:sLeft, width:sW, height:sH, borderRadius:14, animation:'tutGlow 2s ease-in-out infinite' }} />
+      {/* Click capture */}
+      <div onClick={handleClick} style={{ position:'fixed', zIndex:9992, cursor:'pointer', top:sTop, left:sLeft, width:sW, height:sH, borderRadius:14 }} />
+      {/* Tooltip */}
+      <div style={{ position:'fixed', zIndex:9993, top:tTop, left:tLeft, width:TW, background:'white', borderRadius:16, padding:'18px 20px 16px', boxShadow:'0 12px 40px rgba(0,0,0,0.22)', border:'1px solid rgba(11,122,106,0.15)', fontFamily:"'Manrope',sans-serif" }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+          <span style={{ fontSize:10, fontWeight:700, letterSpacing:'0.07em', textTransform:'uppercase', color:'#0B7A6A', background:'#EDF7F4', padding:'2px 8px', borderRadius:99 }}>{current.badge}</span>
+          <button onClick={onSkip} style={{ background:'none', border:'none', cursor:'pointer', fontSize:11, color:'#94A3B8', padding:0, fontFamily:"'Manrope',sans-serif", textDecoration:'underline', textUnderlineOffset:2 }}>Passer</button>
+        </div>
+        <p style={{ fontSize:13.5, fontWeight:600, color:'#1A202C', margin:'0 0 7px', lineHeight:1.3 }}>{current.title}</p>
+        <p style={{ fontSize:12.5, color:'#64748B', margin:'0 0 16px', lineHeight:1.65 }}>{current.message}</p>
+        <button onClick={handleClick} style={{ width:'100%', padding:'9px 14px', borderRadius:10, border:'none', background:'#0B7A6A', color:'white', fontSize:12.5, fontWeight:600, cursor:'pointer', fontFamily:"'Manrope',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:6, boxShadow:'0 3px 12px rgba(11,122,106,0.3)' }}>
+          {current.cta} →
+        </button>
+      </div>
+    </>,
+    document.body
+  );
+}
+
 // ─── ChatInner ────────────────────────────────────────────────────────────────
 function ChatInner() {
   const router = useRouter();
@@ -406,6 +509,7 @@ function ChatInner() {
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderColor, setNewFolderColor] = useState('#0B7A6A');
   const newFolderInputRef = useRef<HTMLInputElement>(null);
   const [patientBanner, setPatientBanner] = useState<PatientBanner | null>(null);
   const [persona, setPersona] = useState(DEMO_PERSONA);
@@ -419,6 +523,12 @@ function ChatInner() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const authTokenRef = useRef<string | null>(null);
   const clarCtxRef = useRef<Record<string, string>>({});
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [practiceType, setPracticeType] = useState<'small' | 'equine' | 'mixed'>('small');
+  const [isFirstSessionDemo, setIsFirstSessionDemo] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
 
   const getAuthHeader = (): Record<string, string> =>
     authTokenRef.current ? { 'Authorization': `Bearer ${authTokenRef.current}` } : {};
@@ -441,6 +551,12 @@ function ChatInner() {
       const initials = ([(firstName[0] ?? ''), (lastName[0] ?? '')].join('').toUpperCase() || user.email?.[0]?.toUpperCase()) ?? '?';
       setPersona({ initials, name: fullName ? `Dr. ${fullName}` : (user.email ?? ''), clinic: meta.clinic_name ?? '' });
       posthog.identify(user.id, { email: user.email, name: fullName || user.email, clinic: meta.clinic_name ?? '' });
+      const practiceSetup = localStorage.getItem('vetaia-practice');
+      if (!practiceSetup) {
+        setShowWelcomeModal(true);
+      } else {
+        setPracticeType(practiceSetup as 'small' | 'equine' | 'mixed');
+      }
       const savedConvos: Conversation[] = JSON.parse(localStorage.getItem('leash-conversations') || '[]');
       const savedFolders: Folder[] = JSON.parse(localStorage.getItem('leash-folders') || '[]');
       setFolders(savedFolders);
@@ -503,16 +619,46 @@ function ChatInner() {
     save(convos.map(c => c.id === id ? { ...c, title: titleInput.trim() } : c)); setEditingTitle(null);
   }
 
-  function addFolder() { setCreatingFolder(true); setNewFolderName(''); setTimeout(() => newFolderInputRef.current?.focus(), 30); }
+  const FOLDER_COLORS = [
+    { hex: '#0B7A6A', label: 'Forêt' },
+    { hex: '#3B7DD8', label: 'Océan' },
+    { hex: '#B8891A', label: 'Ambre' },
+    { hex: '#8356BF', label: 'Prune' },
+    { hex: '#64748B', label: 'Ardoise' },
+  ];
+
+  function addFolder() { setCreatingFolder(true); setNewFolderName(''); setNewFolderColor('#0B7A6A'); setTimeout(() => newFolderInputRef.current?.focus(), 30); }
   function commitNewFolder() {
-    if (newFolderName.trim()) saveFolders([...folders, { id: genId(), name: newFolderName.trim(), color: '#0B7A6A', collapsed: false, createdAt: Date.now() }]);
-    setCreatingFolder(false); setNewFolderName('');
+    if (newFolderName.trim()) saveFolders([...folders, { id: genId(), name: newFolderName.trim(), color: newFolderColor, collapsed: false, createdAt: Date.now() }]);
+    setCreatingFolder(false); setNewFolderName(''); setNewFolderColor('#0B7A6A');
   }
   function toggleFolderCollapsed(id: string) { saveFolders(folders.map(f => f.id === id ? { ...f, collapsed: !f.collapsed } : f)); }
   function renameFolder(id: string, name: string) { if (!name.trim()) return; saveFolders(folders.map(f => f.id === id ? { ...f, name: name.trim() } : f)); setRenamingFolderId(null); }
   function deleteFolder(id: string) { save(convos.map(c => c.folderId === id ? { ...c, folderId: null } : c)); saveFolders(folders.filter(f => f.id !== id)); }
   function moveConvoToFolder(convoId: string, folderId: string | null) { save(convos.map(c => c.id === convoId ? { ...c, folderId } : c)); setMovingConvoId(null); }
   async function logout() { await supabase.auth.signOut(); router.push('/login'); }
+
+  function doneTutorial() {
+    localStorage.setItem('vetaia-tutorial-done', '1');
+    setShowTutorial(false);
+    setTutorialStep(0);
+  }
+
+  function handlePracticeSelect(type: 'small' | 'equine' | 'mixed') {
+    localStorage.setItem('vetaia-practice', type);
+    setPracticeType(type);
+    setShowWelcomeModal(false);
+    if (!localStorage.getItem('vetaia-tutorial-done')) {
+      setTimeout(() => { setShowTutorial(true); setTutorialStep(0); }, 300);
+    }
+    const demos: Record<string, string> = {
+      small: 'Milo, golden retriever, 5 ans, 32 kg, mâle castré. Motif : vomissements depuis ce matin, 3 épisodes. Anorexie depuis hier soir. À l\'examen : abdomen légèrement tendu en région épigastrique, douleur modérée à la palpation. Muqueuses roses, TR 38.6°C, FC 88/min. Pas de corps étranger palpable. Propriétaire signale possible ingestion d\'ordures la veille. Plan : mise à jeun 24h, fluidothérapie SC, antiémétique. Contrôle J2.',
+      equine: 'Sultan, cheval de sport, 8 ans, 560 kg, hongre. Boiterie antérieur gauche depuis 48h, apparue brutalement après séance de dressage. À l\'examen : chaleur et œdème péri-articulaire au boulet gauche, douleur à la palpation, flexion distale positive 2/5. Test de la pince négatif. Pas de plaie visible. Mise au box strict. Radiographies du boulet recommandées. AINS per os 5 jours.',
+      mixed: 'Plume, chatte européenne, 6 ans, 3,8 kg, stérilisée. Motif : polydipsie et polyurie depuis 3 semaines, légère perte de poids. TR 38.9°C, FC 180/min, muqueuses roses. Rein gauche légèrement irrégulier à la palpation. Bilan sanguin recommandé : biochimie complète, NFS, T4, urée/créatinine. Bandelette urinaire : densité 1012, traces de protéines.',
+    };
+    setRecordingTranscript(demos[type]);
+    setIsFirstSessionDemo(true);
+  }
 
   const autoResize = useCallback(() => {
     const el = textareaRef.current;
@@ -528,7 +674,7 @@ function ChatInner() {
 
   async function sendMessage(text: string, overrideCtx?: Record<string, string>) {
     if (!text.trim() || loading) return;
-    const isReport = text.startsWith('Génère un compte rendu SOAP');
+    const isReport = text.startsWith('Génère un compte rendu');
     posthog.capture(isReport ? 'report_generated' : 'message_sent', {
       has_patient: !!patientBanner,
       patient_species: patientBanner?.species ?? null,
@@ -671,7 +817,7 @@ function ChatInner() {
 
   function finishConsultation() {
     if (isRecording || isPaused) { stopRecording(); }
-    if (recordingTranscript) { sendMessage('Génère un compte rendu SOAP pour cette consultation :\n\n' + recordingTranscript); }
+    if (recordingTranscript) { sendMessage('Génère un compte rendu de consultation :\n\n' + recordingTranscript); }
   }
 
   function speciesEmoji(s: string) { if (s === 'chien') return '🐕'; if (s === 'chat') return '🐈'; return '🐾'; }
@@ -690,14 +836,33 @@ function ChatInner() {
     />
   );
 
-  const EXAMPLES = [
-    { icon: '💊', text: 'Protocole antimicrobien pour une pyodermite superficielle chez le chien', tag: 'Pharmacologie' },
-    { icon: '🫀', text: 'Staging IRIS insuffisance rénale chronique stade 3 chez le chat', tag: 'Guideline' },
-    { icon: '🩺', text: 'Diagnostics différentiels pour un épanchement pleural chez le chat', tag: 'Clinique' },
-    { icon: '🔬', text: 'Valeurs normales NFS chien adulte et interprétation leucocytose', tag: 'Biologie' },
-    { icon: '⚡', text: 'Protocole CPR RECOVER 2024 arrêt cardio-respiratoire chien', tag: 'Urgences' },
-    { icon: '🐾', text: 'Effets secondaires AINS chez le chien insuffisant rénal', tag: 'Pharmacologie' },
-  ];
+  const EXAMPLES_BY_PRACTICE = {
+    small: [
+      { icon: '💊', text: 'Dosage amoxicilline-acide clavulanique — chat 4,5 kg, pyodermite profonde', tag: 'Pharmacologie' },
+      { icon: '🫀', text: 'IRC féline stade IRIS 3 — objectifs tensionnels et traitement', tag: 'Guideline' },
+      { icon: '🩺', text: 'Polyurie-polydipsie chez le chien — diagnostics différentiels par fréquence', tag: 'Clinique' },
+      { icon: '🔬', text: 'Hypercalcémie canine — approche diagnostique étape par étape', tag: 'Biologie' },
+      { icon: '⚡', text: 'Protocole CPR RECOVER 2024 — arrêt cardio-respiratoire chien', tag: 'Urgences' },
+      { icon: '🐾', text: 'AINS chez le chien insuffisant rénal — risques et alternatives', tag: 'Pharmacologie' },
+    ],
+    equine: [
+      { icon: '🐴', text: 'Anesthésie castration poulain debout — xylazine + détomidine + butorphanol', tag: 'Anesthésie' },
+      { icon: '💊', text: 'Dosage pénicilline G cheval 550 kg — pneumonie bactérienne', tag: 'Pharmacologie' },
+      { icon: '🦵', text: 'Boiterie antérieure brutale cheval de sport — bilan diagnostic', tag: 'Clinique' },
+      { icon: '🔬', text: 'Fourbure — critères radiographiques de gravité et pronostic', tag: 'Orthopédie' },
+      { icon: '⚡', text: 'Colique équine — critères décision médical vs chirurgical', tag: 'Urgences' },
+      { icon: '🌡️', text: 'Syndrome de Cushing équin (PPID) — diagnostic et prise en charge', tag: 'Endocrinologie' },
+    ],
+    mixed: [
+      { icon: '🐄', text: 'Hypocalcémie post-partum vache — protocole perfusion calcique IV', tag: 'Bovin' },
+      { icon: '💊', text: 'Dosage amoxicilline veau 80 kg — pneumonie enzootique', tag: 'Pharmacologie' },
+      { icon: '🩺', text: 'Métrite purulente chez la vache — traitement local et général', tag: 'Clinique' },
+      { icon: '🐾', text: 'IRC féline stade IRIS 3 — objectifs tensionnels et traitement', tag: 'Petits animaux' },
+      { icon: '⚡', text: 'Météorisation gazeuse bovine aiguë — intervention en urgence', tag: 'Urgences' },
+      { icon: '🐴', text: 'Boiterie antérieure cheval de sport — bilan diagnostic', tag: 'Équidés' },
+    ],
+  };
+  const EXAMPLES = EXAMPLES_BY_PRACTICE[practiceType];
 
   const dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -744,6 +909,65 @@ function ChatInner() {
         .mode-pill.inactive:hover { color: #486081; }
       `}</style>
 
+      {/* ── Welcome modal ─────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showWelcomeModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,32,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{ background: 'white', borderRadius: 24, padding: '40px 36px 36px', maxWidth: 420, width: '100%', boxShadow: '0 24px 80px rgba(0,0,0,0.18)' }}>
+              <div style={{ marginBottom: 28 }}>
+                <Logo height={26} />
+              </div>
+              <h2 style={{ fontFamily: "'Newsreader', serif", fontSize: 26, fontWeight: 400, color: '#1A202C', margin: '0 0 10px', lineHeight: 1.25, letterSpacing: '-0.02em' }}>
+                Bienvenue.<br/>
+                <span style={{ color: '#0B7A6A' }}>Quelle est votre pratique ?</span>
+              </h2>
+              <p style={{ fontSize: 13.5, color: '#8A9BB0', margin: '0 0 28px', lineHeight: 1.6 }}>
+                VetaIA adapte ses exemples et ses références à votre activité.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { type: 'small' as const, label: 'Petits animaux', sub: 'Chiens, chats, NAC', emoji: '🐾' },
+                  { type: 'equine' as const, label: 'Équidés', sub: 'Chevaux, poneys', emoji: '🐴' },
+                  { type: 'mixed' as const, label: 'Mixte / Rurale', sub: 'Bovins, ovins, mixte', emoji: '🐄' },
+                ].map(({ type, label, sub, emoji }) => (
+                  <button key={type} onClick={() => handlePracticeSelect(type)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 14, border: '1.5px solid #E2E8F0', background: 'white', cursor: 'pointer', fontFamily: "'Manrope', sans-serif", textAlign: 'left', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#0B7A6A'; el.style.background = '#F0FAF7'; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#E2E8F0'; el.style.background = 'white'; }}>
+                    <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>{emoji}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#1A202C', marginBottom: 2 }}>{label}</div>
+                      <div style={{ fontSize: 12, color: '#8A9BB0' }}>{sub}</div>
+                    </div>
+                    <ChevronRight size={16} style={{ marginLeft: 'auto', color: '#CBD5E0', flexShrink: 0 }} />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Spotlight tutorial ────────────────────────────────────────────────── */}
+      {showTutorial && tutorialStep < SPOTLIGHT_STEPS.length && (
+        <TutorialSpotlight
+          step={tutorialStep}
+          onNext={() => {
+            if (tutorialStep < SPOTLIGHT_STEPS.length - 1) {
+              setTutorialStep(s => s + 1);
+              if (tutorialStep === 0) setActiveTab('consultation');
+              if (tutorialStep === 1) setActiveTab('chat');
+            } else {
+              doneTutorial();
+            }
+          }}
+          onSkip={doneTutorial}
+        />
+      )}
+
       <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: "'Manrope', sans-serif", background: '#F7FAFC' }}>
 
         {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
@@ -766,7 +990,8 @@ function ChatInner() {
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
               <Settings size={14} style={{ flexShrink: 0 }} /> Modules
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: '#94A3B8', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'background 0.12s' }}
+            <div onClick={() => { setTutorialStep(0); setShowTutorial(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 8, color: '#94A3B8', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'background 0.12s' }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F8FAFB'}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
               <HelpCircle size={14} style={{ flexShrink: 0 }} /> Guide d&apos;utilisation
@@ -786,15 +1011,24 @@ function ChatInner() {
             </button>
 
             {creatingFolder ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 8, border: '1px solid #BBE0D6', background: '#F0FAF7' }}>
-                <FolderPlus size={13} style={{ color: '#0B7A6A', flexShrink: 0 }} />
-                <input ref={newFolderInputRef} value={newFolderName}
-                  onChange={e => setNewFolderName(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') commitNewFolder(); if (e.key === 'Escape') { setCreatingFolder(false); setNewFolderName(''); } }}
-                  onBlur={commitNewFolder}
-                  placeholder="Nom du dossier…"
-                  style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#364152', fontSize: 12.5, fontFamily: "'Manrope', sans-serif" }}
-                />
+              <div style={{ borderRadius: 10, border: '1px solid #BBE0D6', background: '#F0FAF7', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: newFolderColor, flexShrink: 0 }} />
+                  <input ref={newFolderInputRef} value={newFolderName}
+                    onChange={e => setNewFolderName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') commitNewFolder(); if (e.key === 'Escape') { setCreatingFolder(false); setNewFolderName(''); } }}
+                    onBlur={commitNewFolder}
+                    placeholder="Nom du dossier patient…"
+                    style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#364152', fontSize: 12.5, fontFamily: "'Manrope', sans-serif" }}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px 8px', borderTop: '1px solid rgba(11,122,106,0.12)' }}>
+                  <span style={{ fontSize: 10, color: '#94A3B8', marginRight: 2 }}>Couleur :</span>
+                  {FOLDER_COLORS.map(({ hex, label }) => (
+                    <button key={hex} onClick={e => { e.preventDefault(); setNewFolderColor(hex); }} title={label}
+                      style={{ width: 14, height: 14, borderRadius: '50%', background: hex, border: newFolderColor === hex ? `2px solid ${hex}` : '2px solid transparent', outline: newFolderColor === hex ? `2px solid ${hex}50` : 'none', cursor: 'pointer', padding: 0, flexShrink: 0, transition: 'all 0.1s' }} />
+                  ))}
+                </div>
               </div>
             ) : (
               <button onClick={addFolder}
@@ -807,7 +1041,7 @@ function ChatInner() {
           </div>
 
           {/* Section label */}
-          <div style={{ padding: '2px 16px 4px', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#CBD5E0', flexShrink: 0 }}>
+          <div style={{ padding: '2px 16px 4px', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#B0BEC5', flexShrink: 0 }}>
             Toutes les consultations
           </div>
 
@@ -848,6 +1082,15 @@ function ChatInner() {
                   {today.length > 0 && (<><SL label="Aujourd'hui" />{today.map(c => renderConvoItem(c))}</>)}
                   {week.length > 0 && (<><SL label="7 derniers jours" />{week.map(c => renderConvoItem(c))}</>)}
                   {older.length > 0 && (<><SL label="Plus ancien" />{older.map(c => renderConvoItem(c))}</>)}
+                  {folders.length === 0 && convos.length >= 2 && (
+                    <button onClick={addFolder}
+                      style={{ width: '100%', marginTop: 10, padding: '9px 10px', borderRadius: 9, border: '1px dashed #BBE0D6', background: 'transparent', color: '#0B7A6A', fontFamily: "'Manrope', sans-serif", fontSize: 11.5, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'all 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#EDF7F4'}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                      <FolderPlus size={12} style={{ flexShrink: 0 }} />
+                      Organiser en dossiers patients
+                    </button>
+                  )}
                 </>
               );
             })()}
@@ -905,9 +1148,9 @@ function ChatInner() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 {recordingTranscript && !isRecording && !isTranscribing && (
-                  <button onClick={() => { sendMessage('Génère un compte rendu SOAP pour cette consultation :\n\n' + recordingTranscript); }}
+                  <button onClick={() => { sendMessage('Génère un compte rendu de consultation :\n\n' + recordingTranscript); }}
                     style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 16px', borderRadius: 9, border: '1px solid #BBE0D6', background: '#EDF7F4', color: '#0B7A6A', fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}>
-                    <FileText size={13} /> Générer le SOAP
+                    <FileText size={13} /> Générer le compte-rendu
                   </button>
                 )}
                 <button onClick={newConvo}
@@ -933,11 +1176,11 @@ function ChatInner() {
             {/* Tabs */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#EDF1F5', borderRadius: 10, padding: 4, width: 'fit-content' }}>
               <button className={`tab-btn${activeTab === 'consultation' ? ' active' : ''}`} onClick={() => setActiveTab('consultation')}>
-                <Mic size={13} /> Consultation
+                <Mic size={13} /> Compte-rendu vocal
               </button>
-              <button className={`tab-btn${activeTab === 'chat' ? ' active' : ''}`} onClick={() => setActiveTab('chat')}>
+              <button data-tutorial="tab-questions" className={`tab-btn${activeTab === 'chat' ? ' active' : ''}`} onClick={() => setActiveTab('chat')}>
                 <FileText size={13} />
-                Assistant IA
+                Questions cliniques
                 {messages.length > 0 && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0B7A6A', display: 'inline-block' }} />}
               </button>
             </div>
@@ -982,9 +1225,19 @@ function ChatInner() {
                     style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
                       <div style={{ maxWidth: 860, margin: '0 auto' }}>
+                        {isFirstSessionDemo && (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px', background: '#EDF7F4', border: '1px solid #BBE0D6', borderRadius: 12, marginBottom: 16 }}>
+                            <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>💡</span>
+                            <div>
+                              <p style={{ fontSize: 13, fontWeight: 600, color: '#0B7A6A', margin: '0 0 2px' }}>Exemple de dictée vocale</p>
+                              <p style={{ fontSize: 12.5, color: '#486081', margin: 0, lineHeight: 1.5 }}>Cliquez sur <strong>Générer le compte-rendu</strong> pour voir VetaIA en action — ou remplacez ce texte par votre propre consultation.</p>
+                            </div>
+                            <button onClick={() => setIsFirstSessionDemo(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontSize: 16, lineHeight: 1, flexShrink: 0, padding: 2 }}>×</button>
+                          </div>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }} />
-                          <span style={{ fontSize: 12, fontWeight: 600, color: '#22C55E', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Transcription prête</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: '#22C55E', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{isFirstSessionDemo ? 'Exemple de consultation' : 'Transcription prête'}</span>
                           <span style={{ fontSize: 12, color: '#CBD5E0', marginLeft: 'auto' }}>Modifiez si nécessaire</span>
                         </div>
                         <textarea value={recordingTranscript} onChange={e => setRecordingTranscript(e.target.value)}
@@ -992,13 +1245,13 @@ function ChatInner() {
                       </div>
                     </div>
                     <div style={{ flexShrink: 0, padding: '14px 32px', borderTop: '1px solid #EDF1F5', background: 'white', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'flex-end' }}>
-                      <button onClick={() => setRecordingTranscript('')}
+                      <button onClick={() => { setRecordingTranscript(''); setIsFirstSessionDemo(false); }}
                         style={{ padding: '9px 18px', borderRadius: 9, border: '1px solid #E2E8F0', background: 'white', fontSize: 13, color: '#94A3B8', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}>
                         Recommencer
                       </button>
                       <button onClick={finishConsultation}
                         style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 22px', borderRadius: 9, border: 'none', background: '#0B7A6A', color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 2px 10px rgba(11,122,106,0.3)' }}>
-                        <FileText size={13} /> Générer le compte-rendu SOAP
+                        <FileText size={13} /> Générer le compte-rendu
                       </button>
                     </div>
                   </motion.div>
@@ -1015,10 +1268,10 @@ function ChatInner() {
                       </div>
                     </div>
                     <div style={{ flexShrink: 0, padding: '14px 32px', borderTop: '1px solid #EDF1F5', background: 'white', display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'flex-end' }}>
-                      <button onClick={() => { if (consultText.trim()) { sendMessage('Génère un compte rendu SOAP pour cette consultation :\n\n' + consultText); setConsultText(''); } }}
+                      <button onClick={() => { if (consultText.trim()) { sendMessage('Génère un compte rendu de consultation :\n\n' + consultText); setConsultText(''); } }}
                         disabled={!consultText.trim()}
                         style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 22px', borderRadius: 9, border: 'none', background: consultText.trim() ? '#0B7A6A' : '#F1F5F9', color: consultText.trim() ? 'white' : '#94A3B8', fontSize: 13, fontWeight: 600, cursor: consultText.trim() ? 'pointer' : 'default', fontFamily: 'inherit', boxShadow: consultText.trim() ? '0 2px 10px rgba(11,122,106,0.3)' : 'none', transition: 'all 0.15s' }}>
-                        <FileText size={13} /> Générer le compte-rendu SOAP
+                        <FileText size={13} /> Générer le compte-rendu
                       </button>
                     </div>
                   </motion.div>
@@ -1091,28 +1344,42 @@ function ChatInner() {
 
                     ) : (
                       /* ── Idle / start ── */
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, position: 'relative', zIndex: 1 }}>
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, position: 'relative', zIndex: 1, width: '100%', maxWidth: 440 }}>
 
-                        {/* Pulsing mic button */}
-                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {[0, 1, 2].map(i => (
-                            <motion.div key={i} style={{ position: 'absolute', borderRadius: '50%', border: '1px solid rgba(11,122,106,0.2)', background: 'rgba(11,122,106,0.04)' }}
-                              animate={{ width: [80, 80 + (i + 1) * 40], height: [80, 80 + (i + 1) * 40], opacity: [0.6, 0] }}
-                              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut', delay: i * 0.6 }} />
-                          ))}
-                          <button onClick={toggleRecording}
-                            style={{ width: 80, height: 80, borderRadius: '50%', border: 'none', background: 'linear-gradient(135deg, #0B7A6A, #0D9C87)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(11,122,106,0.4)', position: 'relative', zIndex: 1, transition: 'transform 0.15s' }}
-                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'}
-                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'scale(1)'}>
-                            <Mic size={28} />
-                          </button>
-                        </div>
+                        {/* Floating card */}
+                        <div style={{ background: 'white', border: '1px solid #E8EDF2', borderRadius: 24, padding: '44px 48px 36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)', width: '100%' }}>
 
-                        <div style={{ textAlign: 'center' }}>
-                          <p style={{ fontSize: 16, fontWeight: 600, color: '#364152', margin: '0 0 6px' }}>Démarrer l&apos;enregistrement</p>
-                          <p style={{ fontSize: 13, color: '#94A3B8', margin: 0, maxWidth: 340, lineHeight: 1.6 }}>
-                            Dictez vos observations pendant la consultation. VetaIA génère automatiquement le compte-rendu SOAP.
+                          {/* Headline */}
+                          <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 400, color: '#1A202C', margin: '0 0 4px', lineHeight: 1.25, letterSpacing: '-0.015em' }}>
+                              Dictez la consultation.
+                            </p>
+                            <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 400, color: '#0B7A6A', margin: 0, lineHeight: 1.25, letterSpacing: '-0.015em', fontStyle: 'italic' }}>
+                              VetaIA rédige le compte-rendu.
+                            </p>
+                          </div>
+
+                          {/* Pulsing mic button */}
+                          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 0' }}>
+                            {[0, 1, 2].map(i => (
+                              <motion.div key={i} style={{ position: 'absolute', borderRadius: '50%', border: '1px solid rgba(11,122,106,0.18)', background: 'rgba(11,122,106,0.03)' }}
+                                animate={{ width: [80, 80 + (i + 1) * 44], height: [80, 80 + (i + 1) * 44], opacity: [0.5, 0] }}
+                                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeOut', delay: i * 0.65 }} />
+                            ))}
+                            <button data-tutorial="mic-button" onClick={toggleRecording}
+                              style={{ width: 80, height: 80, borderRadius: '50%', border: 'none', background: 'linear-gradient(135deg, #0B7A6A, #0D9C87)', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(11,122,106,0.38)', position: 'relative', zIndex: 1, transition: 'transform 0.15s, box-shadow 0.15s' }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.06)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(11,122,106,0.5)'; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(11,122,106,0.38)'; }}>
+                              <Mic size={28} />
+                            </button>
+                          </div>
+
+                          {/* Description */}
+                          <p style={{ fontSize: 13, color: '#8A9BB0', margin: 0, textAlign: 'center', lineHeight: 1.7, maxWidth: 300 }}>
+                            Parlez pendant l&apos;examen. VetaIA transcrit en temps réel et génère le compte-rendu structuré en 30 secondes.{' '}
+                            <span style={{ color: '#0B7A6A', fontWeight: 500 }}>Prêt à signer, sans toucher au clavier.</span>
                           </p>
                         </div>
                       </motion.div>
@@ -1130,20 +1397,27 @@ function ChatInner() {
               <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 16 }}>
                 {messages.length === 0 ? (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: 20, paddingTop: 8 }}>
-                    <p style={{ fontSize: 13, color: '#94A3B8', fontWeight: 500, margin: 0 }}>
-                      Posez une question clinique ou essayez un exemple :
-                    </p>
+                    style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingTop: 20, width: '100%' }}>
+                    {/* Welcome header */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0B7A6A', margin: 0 }}>
+                        Questions cliniques
+                      </p>
+                      <p style={{ fontSize: 13.5, color: '#8A9BB0', margin: 0, lineHeight: 1.6, fontWeight: 400 }}>
+                        Posez votre question ou choisissez un exemple pour commencer.
+                      </p>
+                    </div>
+                    {/* Example chips — 3 columns full width */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                       {EXAMPLES.map((ex, i) => (
-                        <motion.button key={ex.text} onClick={() => sendMessage(ex.text)}
+                        <motion.button key={ex.text} data-tutorial={i === 0 ? 'chip-example' : undefined} onClick={() => sendMessage(ex.text)}
                           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, textAlign: 'left', background: 'white', border: '1px solid #E2E8F0', borderRadius: 14, padding: '18px 16px 16px', cursor: 'pointer', fontFamily: "'Manrope', sans-serif", transition: 'all 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
-                          whileHover={{ borderColor: '#BBE0D6', boxShadow: '0 2px 12px rgba(11,122,106,0.1)', y: -2 }}>
-                          <span style={{ fontSize: 22, lineHeight: 1 }}>{ex.icon}</span>
+                          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12, textAlign: 'left', background: 'white', border: '1px solid #EDF1F5', borderLeft: '3px solid #0B7A6A', borderRadius: 12, padding: '13px 16px', cursor: 'pointer', fontFamily: "'Manrope', sans-serif", transition: 'all 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+                          whileHover={{ borderColor: '#BBE0D6', boxShadow: '0 2px 12px rgba(11,122,106,0.1)', y: -1 }}>
+                          <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>{ex.icon}</span>
                           <span style={{ fontSize: 12.5, color: '#486081', lineHeight: 1.5, flex: 1 }}>{ex.text}</span>
-                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#0B7A6A', background: '#EAF4F2', padding: '2px 7px', borderRadius: 99 }}>{ex.tag}</span>
+                          <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#0B7A6A', background: '#EAF4F2', padding: '2px 7px', borderRadius: 99, flexShrink: 0, whiteSpace: 'nowrap' }}>{ex.tag}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -1157,7 +1431,7 @@ function ChatInner() {
                           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                           style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                           {msg.role === 'user' ? (
-                            <div style={{ maxWidth: '62%', padding: '11px 16px', borderRadius: '16px 4px 16px 16px', background: '#0B7A6A', color: 'white', fontSize: 13.5, lineHeight: 1.65, fontWeight: 500, whiteSpace: 'pre-wrap', wordBreak: 'break-word', boxShadow: '0 2px 8px rgba(11,122,106,0.25)' }}>
+                            <div style={{ maxWidth: '62%', padding: '11px 16px', borderRadius: '18px 4px 18px 18px', background: '#0B7A6A', color: 'white', fontSize: 13.5, lineHeight: 1.65, fontWeight: 500, letterSpacing: '-0.01em', whiteSpace: 'pre-wrap', wordBreak: 'break-word', boxShadow: '0 2px 8px rgba(11,122,106,0.25)' }}>
                               {msg.content}
                             </div>
                           ) : msg.mode === 'clarification' && msg.clarification ? (
@@ -1191,6 +1465,7 @@ function ChatInner() {
               <div style={{ flexShrink: 0, paddingBottom: 20 }}>
                 <motion.div
                   animate={{ borderColor: '#E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+                  whileHover={{ boxShadow: '0 0 0 3px rgba(11,122,106,0.08), 0 2px 8px rgba(0,0,0,0.06)' }}
                   style={{ background: 'white', border: '1.5px solid #E2E8F0', borderRadius: 16 }}>
                   <div style={{ padding: '12px 16px 6px' }}>
                     <textarea ref={textareaRef} value={input}
