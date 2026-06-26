@@ -1,1 +1,1 @@
-# Leash AI — Veterinary Assistant
+Veterinary Assistant
